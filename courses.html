@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sprint OS · Courses</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.overview-grid {
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:10px; margin-bottom:24px;
+}
+.ov-card {
+  background:var(--bg2); border:1px solid var(--border2);
+  border-radius:var(--radius); padding:14px 16px; text-align:center;
+  transition:transform .14s;
+}
+.ov-card:hover { transform:translateY(-2px); }
+.ov-num { font-family:var(--font-display); font-size:1.8rem; letter-spacing:.04em; line-height:1; margin-bottom:4px; }
+.ov-lbl { font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--text3); }
+.ov-bar { height:2px; border-radius:2px; margin-top:8px; overflow:hidden; background:var(--border2); }
+.ov-fill{ height:100%; border-radius:2px; transition:width 1s ease; }
+</style>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<main class="main fade-in">
+
+  <div class="page-header">
+    <div>
+      <div class="ph-eyebrow">Course Tracker</div>
+      <div class="ph-title">Course <span class="accent">Queue</span></div>
+      <div class="ph-sub">
+        <span class="ph-tag"><span class="ph-dot" style="background:var(--red)"></span><span>edX → LinkedIn → Coursera → Udemy</span></span>
+        <span class="ph-tag"><span class="ph-dot" style="background:var(--green)"></span><span>Click to check off · Synced to Drive</span></span>
+      </div>
+    </div>
+    <div class="ph-meta">
+      <div class="ph-month-big" id="ph-month">—</div>
+      <div class="ph-month-label">Plan Month / 18</div>
+    </div>
+  </div>
+
+  <div class="alert danger" style="margin-bottom:20px">
+    <span class="alert-icon">⚠️</span>
+    <strong>Platform order (strict):</strong> edX (⚠️ Jun 26) → LinkedIn (~2.5 hrs) → Coursera (Aug 2026, 8–9 months) → Udemy (Apr 2027+). IELTS runs parallel every day until exam.
+  </div>
+
+  <!-- OVERVIEW STAT CARDS -->
+  <div class="overview-grid" id="overview-grid"></div>
+
+  <!-- PHASE ACCORDIONS -->
+  <div id="phases-container"></div>
+
+  <!-- FOOTER COUNTS -->
+  <div style="padding:12px 0;border-top:1px solid var(--border2);margin-top:8px;font-size:11px;color:var(--text3);display:flex;gap:18px;flex-wrap:wrap" id="courses-footer"></div>
+
+  <p class="footnote">
+    ★ = first priority within platform · ✗ = recommended to drop to protect timeline<br>
+    Completed courses (✓) are auto-saved to Google Drive when signed in.<br>
+    Courses marked DROP are greyed and non-interactive.
+  </p>
+
+</main>
+<div id="footer-placeholder"></div>
+<script src="data.js"></script>
+<script src="update.js"></script>
+<script async defer src="https://apis.google.com/js/api.js" onload="U.init()"></script>
+<script>
+window.addEventListener('load', () => { if(!window._gapiInitDone) U.init(); });
+
+const phOpen = { edx:true, li:false, coursera:false, udemy:false };
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('nav-placeholder').innerHTML    = buildNavHTML('courses.html');
+  document.getElementById('footer-placeholder').innerHTML = buildFooterHTML();
+  document.getElementById('ph-month').textContent = U.Phase.planMonth();
+  renderCourses();
+});
+document.addEventListener('courses:updated', renderCourses);
+document.addEventListener('ui:refresh',      renderCourses);
+document.addEventListener('state:loaded',    renderCourses);
+
+// Build flat index once
+const FLAT = flatCourses();
+
+function togglePh(id) {
+  phOpen[id] = !phOpen[id];
+  const body = document.getElementById('ph-body-' + id);
+  const chev = document.getElementById('ph-chev-' + id);
+  const prog = document.getElementById('ph-prog-' + id);
+  if (body) body.classList.toggle('open', phOpen[id]);
+  if (chev) chev.classList.toggle('open', phOpen[id]);
+  if (prog) prog.style.display = phOpen[id] ? 'none' : 'block';
+}
+
+function toggleCourse(gi) {
+  if (FLAT[gi]?.fixed || FLAT[gi]?.drop) return;
+  U.toggleCourse(gi);
+}
+
+function renderCourses() {
+  const cDone = getCDone();
+  const total  = FLAT.length;
+  const done   = cDone.filter(Boolean).length;
+  const dropped = FLAT.filter(c => c.drop).length;
+  const pct    = total > 0 ? Math.round(done/total*100) : 0;
+
+  // Overview cards
+  document.getElementById('overview-grid').innerHTML = `
+    <div class="ov-card"><div class="ov-num" style="color:var(--blue)">${done}</div><div class="ov-lbl">Completed</div><div class="ov-bar"><div class="ov-fill" style="background:var(--blue);width:${done/total*100}%"></div></div></div>
+    <div class="ov-card"><div class="ov-num" style="color:var(--text3)">${total-done-dropped}</div><div class="ov-lbl">Pending</div><div class="ov-bar"><div class="ov-fill" style="background:var(--text3);width:${(total-done-dropped)/total*100}%"></div></div></div>
+    <div class="ov-card"><div class="ov-num" style="color:var(--red)">${dropped}</div><div class="ov-lbl">Drop</div><div class="ov-bar"><div class="ov-fill" style="background:var(--red);width:${dropped/total*100}%"></div></div></div>
+    <div class="ov-card"><div class="ov-num" style="color:var(--green)">${pct}%</div><div class="ov-lbl">Progress</div><div class="ov-bar"><div class="ov-fill" style="background:var(--green);width:${pct}%"></div></div></div>
+  `;
+
+  // Build phases
+  let gi = 0;
+  const statMap = { urgent:'phs-urgent', active:'phs-active', paused:'phs-paused', later:'phs-later' };
+  const colMap  = { edx:'var(--red)', li:'var(--blue)', coursera:'var(--amber)', udemy:'var(--green)' };
+
+  document.getElementById('phases-container').innerHTML = PHASES.map(p => {
+    const startGi = gi;
+    let phDone = 0, phTotal = 0;
+    p.groups.forEach(g => g.courses.forEach(() => {
+      if (cDone[gi + phTotal]) phDone++;
+      phTotal++;
+    }));
+    const phPct = phTotal ? phDone/phTotal*100 : 0;
+
+    // Build groups HTML
+    let gHtml = '';
+    let tempGi = startGi;
+    p.groups.forEach(g => {
+      gHtml += `<div class="cg-head">${g.name}<span class="cg-month">${g.month}</span></div>`;
+      g.courses.forEach(c => {
+        const isDone  = cDone[tempGi];
+        const isCdone = c.fixed;
+        gHtml += `<div class="course-row ${isCdone?'is-cdone':isDone?'is-done':''}" onclick="toggleCourse(${tempGi})" style="${(c.fixed||c.drop)?'cursor:default':''}">
+          <div class="cr-box">${(isDone||isCdone)?'✓':''}</div>
+          <div class="cr-star">${c.pri?'★':c.drop?'✗':''}</div>
+          <div class="cr-name ${c.drop?'cr-drop':''}">${c.n}${c.drop?' <em style="font-size:9px;color:var(--red);font-style:normal">[DROP]</em>':''}</div>
+          <div class="cr-prog">${c.prog}</div>
+          <div class="cr-plat plat-${c.pc}">${c.plat}</div>
+        </div>`;
+        tempGi++;
+      });
+    });
+    gi = tempGi;
+
+    const isOpen = phOpen[p.id];
+    return `<div class="phase-wrap">
+      <div class="phase-head ${p.headCls}" onclick="togglePh('${p.id}')">
+        <span class="ph-num">${p.num}</span>
+        <span class="ph-label">${p.label}</span>
+        <span class="ph-when">${p.when}</span>
+        <span class="ph-status ${statMap[p.status]||'phs-paused'}">${p.statLabel}</span>
+        <span class="ph-count">${phDone}/${phTotal}</span>
+        <span class="ph-chev ${isOpen?'open':''}" id="ph-chev-${p.id}">▼</span>
+      </div>
+      <div class="ph-progress" id="ph-prog-${p.id}" style="${isOpen?'display:none':''}">
+        <div class="ph-prog-fill ${p.headCls}" style="width:${phPct}%;background:${colMap[p.id]}"></div>
+      </div>
+      <div class="phase-body${isOpen?' open':''}" id="ph-body-${p.id}">
+        <div class="alert ${p.alertCls}" style="margin:8px 16px 4px">
+          <span class="alert-icon">ℹ</span><span>${p.alertTxt}</span>
+        </div>
+        ${gHtml}
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('courses-footer').innerHTML = `
+    <span>Total: <strong style="color:var(--text)">${total}</strong></span>
+    <span>Completed: <strong style="color:var(--green)">${done}</strong></span>
+    <span>Remaining: <strong style="color:var(--text)">${total-done-dropped}</strong></span>
+    <span>Progress: <strong style="color:var(--text)">${pct}%</strong></span>
+    <span>Recommended drop: <strong style="color:var(--red)">${dropped}</strong></span>
+  `;
+}
+</script>
+</body>
+</html>

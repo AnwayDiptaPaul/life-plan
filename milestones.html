@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sprint OS · Milestones</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.progress-header {
+  display:grid; grid-template-columns:auto 1fr; gap:24px; align-items:center;
+  background:var(--bg2); border:1px solid var(--border2);
+  border-left:3px solid var(--green); border-radius:var(--radius);
+  padding:22px 28px; margin-bottom:24px;
+}
+.ph-rings { display:flex; gap:20px; flex-wrap:wrap; }
+.ring-group { text-align:center; }
+.ring-group-label { font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--text3); margin-top:6px; }
+
+.cat-bars { flex:1; display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.cat-bar-item {}
+.cbi-label { font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:var(--text3); margin-bottom:4px; display:flex; justify-content:space-between; }
+.cbi-track { height:4px; background:var(--border2); border-radius:2px; overflow:hidden; }
+.cbi-fill  { height:100%; border-radius:2px; transition:width 1s ease; }
+
+.m-group-head {
+  font-size:9px; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--text3); padding:10px 0 6px;
+  border-top:1px solid var(--border2); margin-top:8px;
+  display:flex; justify-content:space-between; align-items:center;
+}
+.m-group-head:first-child { border-top:none; margin-top:0; }
+.mgh-count { font-size:9px; padding:1px 7px; border-radius:2px; border:1px solid var(--border2); color:var(--dim); }
+
+#ielts-section { scroll-margin-top: 80px; }
+
+.ielts-log-form {
+  background:var(--bg2); border:1px solid var(--border2);
+  border-top:2px solid var(--amber); border-radius:var(--radius);
+  padding:20px 24px; margin-bottom:20px;
+}
+.ielts-log-title { font-family:var(--font-display); font-size:1.1rem; letter-spacing:.05em; margin-bottom:14px; }
+.band-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:12px; }
+.band-input { text-align:center; }
+.band-label { font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:var(--text3); margin-bottom:4px; }
+.band-field { font-family:var(--font-display); font-size:1.3rem; text-align:center; }
+
+@media(max-width:640px){
+  .progress-header { grid-template-columns:1fr; }
+  .cat-bars { grid-template-columns:1fr; }
+  .band-grid { grid-template-columns:repeat(2,1fr); }
+}
+</style>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<main class="main fade-in">
+
+  <div class="page-header">
+    <div>
+      <div class="ph-eyebrow">Milestone Tracker</div>
+      <div class="ph-title">Goals &amp; <span class="accent">Milestones</span></div>
+      <div class="ph-sub">
+        <span class="ph-tag"><span class="ph-dot" style="background:var(--green)"></span><span>Click any item to check off</span></span>
+        <span class="ph-tag"><span class="ph-dot" style="background:var(--amber)"></span><span>Auto-synced to Google Drive</span></span>
+      </div>
+    </div>
+    <div class="ph-meta">
+      <div class="ph-month-big" id="ph-month">—</div>
+      <div class="ph-month-label">Plan Month / 18</div>
+    </div>
+  </div>
+
+  <!-- PROGRESS HEADER -->
+  <div class="progress-header" id="progress-header">
+    <div class="ph-rings">
+      <div class="ring-group">
+        <div class="ring-wrap">
+          <svg class="ring-svg" width="72" height="72" viewBox="0 0 72 72">
+            <circle class="ring-track" cx="36" cy="36" r="28" stroke-width="6"/>
+            <circle class="ring-fill" id="ring-overall" cx="36" cy="36" r="28" stroke="var(--green)" stroke-width="6"
+              stroke-dasharray="175.9" stroke-dashoffset="175.9"/>
+          </svg>
+          <div class="ring-label">
+            <div class="ring-pct" id="ring-pct-overall" style="color:var(--green)">0%</div>
+            <div class="ring-sub">Overall</div>
+          </div>
+        </div>
+        <div class="ring-group-label" id="ring-count-overall">0 / 0</div>
+      </div>
+      <div class="ring-group">
+        <div class="ring-wrap">
+          <svg class="ring-svg" width="56" height="56" viewBox="0 0 56 56">
+            <circle class="ring-track" cx="28" cy="28" r="22" stroke-width="5"/>
+            <circle class="ring-fill" id="ring-urgent" cx="28" cy="28" r="22" stroke="var(--red)" stroke-width="5"
+              stroke-dasharray="138.2" stroke-dashoffset="138.2"/>
+          </svg>
+          <div class="ring-label">
+            <div class="ring-pct" id="ring-pct-urgent" style="color:var(--red);font-size:1rem">0%</div>
+          </div>
+        </div>
+        <div class="ring-group-label">Urgent</div>
+      </div>
+      <div class="ring-group">
+        <div class="ring-wrap">
+          <svg class="ring-svg" width="56" height="56" viewBox="0 0 56 56">
+            <circle class="ring-track" cx="28" cy="28" r="22" stroke-width="5"/>
+            <circle class="ring-fill" id="ring-priority" cx="28" cy="28" r="22" stroke="var(--amber)" stroke-width="5"
+              stroke-dasharray="138.2" stroke-dashoffset="138.2"/>
+          </svg>
+          <div class="ring-label">
+            <div class="ring-pct" id="ring-pct-priority" style="color:var(--amber);font-size:1rem">0%</div>
+          </div>
+        </div>
+        <div class="ring-group-label">Priority</div>
+      </div>
+    </div>
+    <div class="cat-bars" id="cat-bars">
+      <div class="cat-bar-item">
+        <div class="cbi-label"><span>Critical (today/urgent)</span><span id="cb-crit">0/0</span></div>
+        <div class="cbi-track"><div class="cbi-fill" id="cbf-crit" style="background:var(--red)"></div></div>
+      </div>
+      <div class="cat-bar-item">
+        <div class="cbi-label"><span>Priority ★</span><span id="cb-pri">0/0</span></div>
+        <div class="cbi-track"><div class="cbi-fill" id="cbf-pri" style="background:var(--amber)"></div></div>
+      </div>
+      <div class="cat-bar-item">
+        <div class="cbi-label"><span>Normal</span><span id="cb-norm">0/0</span></div>
+        <div class="cbi-track"><div class="cbi-fill" id="cbf-norm" style="background:var(--blue)"></div></div>
+      </div>
+      <div class="cat-bar-item">
+        <div class="cbi-label"><span>Savings goals</span><span id="cb-save">0/0</span></div>
+        <div class="cbi-track"><div class="cbi-fill" id="cbf-save" style="background:var(--green)"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- IELTS LOG FORM -->
+  <div id="ielts-section">
+    <div class="ielts-log-form" id="ielts-log-form">
+      <div class="ielts-log-title">📝 Log IELTS Score</div>
+      <div class="alert warn" id="ielts-alert">
+        <span class="alert-icon">⚡</span>
+        <span id="ielts-alert-text">Exam not yet taken. Log your score here once you sit it — this switches the planner to Post-IELTS mode.</span>
+      </div>
+      <div class="band-grid">
+        <div class="band-input">
+          <div class="band-label">Listening</div>
+          <input class="field band-field" type="number" id="b-listening" step="0.5" min="0" max="9" placeholder="—"/>
+        </div>
+        <div class="band-input">
+          <div class="band-label">Reading</div>
+          <input class="field band-field" type="number" id="b-reading" step="0.5" min="0" max="9" placeholder="—"/>
+        </div>
+        <div class="band-input">
+          <div class="band-label">Writing</div>
+          <input class="field band-field" type="number" id="b-writing" step="0.5" min="0" max="9" placeholder="—"/>
+        </div>
+        <div class="band-input">
+          <div class="band-label">Speaking</div>
+          <input class="field band-field" type="number" id="b-speaking" step="0.5" min="0" max="9" placeholder="—"/>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;margin-top:16px;flex-wrap:wrap">
+        <div class="card-label">Overall Band:</div>
+        <div style="font-family:var(--font-display);font-size:1.8rem;color:var(--amber)" id="overall-calc">—</div>
+        <button class="btn btn-primary" onclick="submitIelts()">Save Score + Switch to Post-IELTS</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MILESTONE LIST -->
+  <div class="sec-head">
+    <div class="sec-title">All Milestones</div>
+    <div class="sec-line"></div>
+    <div class="sec-tag amber">18-month plan</div>
+  </div>
+
+  <div id="m-list-wrap"></div>
+
+  <p class="footnote">
+    ★ = top priority · ⚠️ = hard deadline · Pulsing = action needed today<br>
+    Savings milestones auto-complete when savings target is reached.<br>
+    All changes are auto-synced to Google Drive when signed in.
+  </p>
+
+</main>
+<div id="footer-placeholder"></div>
+<script src="data.js"></script>
+<script src="update.js"></script>
+<script async defer src="https://apis.google.com/js/api.js" onload="U.init()"></script>
+<script>
+window.addEventListener('load', () => { if(!window._gapiInitDone) U.init(); });
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('nav-placeholder').innerHTML    = buildNavHTML('milestones.html');
+  document.getElementById('footer-placeholder').innerHTML = buildFooterHTML();
+  refreshUI();
+
+  // Live band calculation
+  ['b-listening','b-reading','b-writing','b-speaking'].forEach(id =>
+    document.getElementById(id).addEventListener('input', calcOverall)
+  );
+
+  // If URL has #ielts-status, scroll to form
+  if (location.hash === '#ielts-status') {
+    setTimeout(() => document.getElementById('ielts-section').scrollIntoView({behavior:'smooth'}), 300);
+  }
+});
+
+document.addEventListener('ui:refresh',         refreshUI);
+document.addEventListener('milestones:updated', refreshUI);
+document.addEventListener('savings:updated',    refreshUI);
+document.addEventListener('state:loaded',       refreshUI);
+
+function calcOverall() {
+  const ids = ['b-listening','b-reading','b-writing','b-speaking'];
+  const vals = ids.map(id => parseFloat(document.getElementById(id).value)).filter(v => !isNaN(v));
+  if (vals.length === 0) { document.getElementById('overall-calc').textContent = '—'; return; }
+  const avg = vals.reduce((a,b) => a+b, 0) / vals.length;
+  const rounded = Math.round(avg * 2) / 2; // IELTS rounds to nearest 0.5
+  const el = document.getElementById('overall-calc');
+  el.textContent = rounded.toFixed(1);
+  el.style.color = rounded >= 7 ? 'var(--green)' : rounded >= 6 ? 'var(--amber)' : 'var(--red)';
+}
+
+function submitIelts() {
+  const overall = parseFloat(document.getElementById('overall-calc').textContent);
+  if (isNaN(overall)) { alert('Enter at least one band score.'); return; }
+  U.markIeltsTaken(overall);
+  refreshUI();
+}
+
+function refreshUI() {
+  const mDone  = getMDone();
+  const total  = MILESTONES.length;
+  const done   = mDone.filter(Boolean).length;
+  const pct    = total > 0 ? done / total : 0;
+
+  // Rings
+  const circ1 = 2 * Math.PI * 28; // r=28
+  const circ2 = 2 * Math.PI * 22; // r=22
+  document.getElementById('ring-overall').style.strokeDashoffset   = circ1 * (1 - pct);
+  document.getElementById('ring-pct-overall').textContent = Math.round(pct * 100) + '%';
+  document.getElementById('ring-count-overall').textContent = done + ' / ' + total;
+
+  const urgentMs   = MILESTONES.filter(m => m.type === 'urgent' || m.type === 'today');
+  const urgentDone = urgentMs.filter((m,i) => mDone[MILESTONES.indexOf(m)]).length;
+  const uPct = urgentMs.length > 0 ? urgentDone / urgentMs.length : 0;
+  document.getElementById('ring-urgent').style.strokeDashoffset = circ2 * (1 - uPct);
+  document.getElementById('ring-pct-urgent').textContent = Math.round(uPct * 100) + '%';
+
+  const priMs   = MILESTONES.filter(m => m.pri);
+  const priDone = priMs.filter(m => mDone[MILESTONES.indexOf(m)]).length;
+  const pPct = priMs.length > 0 ? priDone / priMs.length : 0;
+  document.getElementById('ring-priority').style.strokeDashoffset = circ2 * (1 - pPct);
+  document.getElementById('ring-pct-priority').textContent = Math.round(pPct * 100) + '%';
+
+  // Category bars
+  const critMs   = MILESTONES.filter(m => m.type === 'urgent' || m.type === 'today');
+  const critDone = critMs.filter(m => mDone[MILESTONES.indexOf(m)]).length;
+  setBar('crit', critDone, critMs.length);
+  setBar('pri',  priDone,  priMs.length);
+  const normMs   = MILESTONES.filter(m => m.type === 'normal');
+  const normDone = normMs.filter(m => mDone[MILESTONES.indexOf(m)]).length;
+  setBar('norm', normDone, normMs.length);
+  const saveMs = MILESTONES.filter(m => m.t.toLowerCase().includes('saving'));
+  const saveDone = saveMs.filter(m => mDone[MILESTONES.indexOf(m)]).length;
+  setBar('save', saveDone, saveMs.length);
+
+  document.getElementById('ph-month').textContent = U.Phase.planMonth();
+
+  // IELTS form
+  const taken = U.Phase.ieltsTaken();
+  const score = U.Phase.ieltsScore();
+  const alertEl = document.getElementById('ielts-alert');
+  const alertTxt = document.getElementById('ielts-alert-text');
+  if (taken) {
+    alertEl.className = score >= 7 ? 'alert ok' : 'alert danger';
+    alertTxt.innerHTML = score >= 7
+      ? `✅ IELTS taken — Band <strong>${score}</strong>. Planner is in Post-IELTS mode. OU application now eligible.`
+      : `⚠️ IELTS taken — Band <strong>${score}</strong> (below 7.0 target). Plan a retake. Update score when ready.`;
+    document.querySelector('.ielts-log-title').textContent = 'Update IELTS Score';
+  }
+
+  // Milestone list
+  const groups = [
+    { label:'Critical & Urgent', types:['today','urgent'], col:'var(--red)' },
+    { label:'Priority ★', types:['priority'], col:'var(--amber)' },
+    { label:'Normal', types:['normal'], col:'var(--blue)' },
+    { label:'Done', types:['done'], col:'var(--green)' },
+  ];
+
+  document.getElementById('m-list-wrap').innerHTML = groups.map(g => {
+    const items = MILESTONES.map((m,i) => ({m,i})).filter(({m}) => g.types.includes(m.type));
+    if (!items.length) return '';
+    const gDone = items.filter(({i}) => mDone[i]).length;
+    return `<div class="m-group-head">
+      <span style="color:${g.col}">${g.label}</span>
+      <span class="mgh-count">${gDone}/${items.length}</span>
+    </div>
+    ${items.map(({m,i}) => {
+      const isDone = mDone[i];
+      let cls = 'check-item';
+      if (isDone)              cls += ' is-done';
+      if (m.type==='urgent')   cls += ' is-urgent';
+      if (m.type==='priority') cls += ' is-priority';
+      if (m.type==='today')    cls += ' is-today';
+      let bCls = 'ci-badge cb-normal';
+      let bStyle = '';
+      if (m.h === 'TODAY' || m.type === 'urgent') { bCls = 'ci-badge cb-urgent'; }
+      else if (m.pri && !isDone) { bCls = 'ci-badge cb-warn'; }
+      else if (isDone) { bCls = 'ci-badge cb-done'; }
+      const noClick = m.type === 'done';
+      return `<div class="${cls}" onclick="${noClick ? '' : `toggleM(${i})`}" style="${noClick?'cursor:default':''}">
+        <div class="ci-box">${isDone ? '✓' : ''}</div>
+        <div class="ci-content">
+          <div class="ci-title">
+            ${m.type==='urgent' ? '<span style="color:var(--red);margin-right:4px">⚠️</span>' : ''}
+            ${m.pri && !isDone  ? '<span style="color:var(--amber);margin-right:4px">★</span>' : ''}
+            ${m.t}
+          </div>
+          <div class="ci-sub">${m.s}</div>
+        </div>
+        <div class="${bCls}">${m.h}</div>
+      </div>`;
+    }).join('')}`;
+  }).join('');
+}
+
+function setBar(key, done, total) {
+  const pct = total > 0 ? (done/total*100) : 0;
+  document.getElementById('cb-'+key).textContent   = done + '/' + total;
+  document.getElementById('cbf-'+key).style.width  = pct + '%';
+}
+
+function toggleM(idx) {
+  U.toggleMilestone(idx);
+}
+</script>
+</body>
+</html>
