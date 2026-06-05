@@ -1,100 +1,148 @@
-# Sprint OS
+# Sprint OS · v2
 
-**A personal life management and accountability system built as a static multi-page GitHub Pages website.**
+**Anway's 18-month personal command center for OU MPhys admission.**
 
-Live 18-month countdown dashboard, interactive checklists, savings tracker, daily schedule generator, and Google Drive/Calendar sync — all running in the browser with no backend.
+A fully static, multi-page GitHub Pages site. No framework, no build step, no backend. Works offline as a PWA. Optionally syncs all state to Google Drive and creates Google Calendar events.
+
+Live site: **https://anwaydiptapaul.github.io/life-plan/**
 
 ---
 
-## 🚀 Deploying to GitHub Pages
+## Pages
 
-### 1. Create a repository
+| Page | URL | Purpose |
+|------|-----|---------|
+| Dashboard | `index.html` | Live clock, NOW/NEXT block, countdowns, stats, IELTS logger |
+| Daily | `daily.html` | Today's schedule — order/free + pre/post-IELTS toggles + live ▶ NOW |
+| Courses | `courses.html` | Full course checklist — 4 platform accordions, ~70 courses |
+| Milestones | `milestones.html` | Progress rings, IELTS logger, OU checklist, milestone list |
+| Savings | `savings.html` | Arc gauge, savings chart, income log, ETA calculator, scenarios |
+| Roadmap | `roadmap.html` | 18-month timeline, month table, period accordions + goal cards |
+| Habits | `habits.html` | Daily habit tracker, 84-day heatmap, IELTS mock score log |
+| Review | `review.html` | Weekly review form + log, Math/Physics chapter tracker |
 
-```bash
-git init
-git remote add origin https://github.com/YOUR_USERNAME/sprint-os.git
-```
+---
 
-### 2. Copy all files into the repo root
-
-The site is fully static — no build step, no Node.js, no dependencies to install.
+## File Structure
 
 ```
 sprint-os/
-├── index.html        ← Dashboard (home page)
-├── daily.html        ← Daily schedule
-├── courses.html      ← Course checklist
-├── milestones.html   ← Milestone tracker
-├── savings.html      ← Savings tracker + ETA
-├── roadmap.html      ← 18-month roadmap
-├── style.css         ← Shared design system
-├── data.js           ← All data + shared utilities
-├── update.js         ← Real-time engine + Google sync
-├── instructions.md   ← Full project documentation
-└── README.md         ← This file
+├── index.html          ← Dashboard
+├── daily.html          ← Daily schedule
+├── courses.html        ← Course checklist
+├── milestones.html     ← Milestone tracker + OU checklist
+├── savings.html        ← Savings tracker + income log
+├── roadmap.html        ← 18-month roadmap
+├── habits.html         ← Habit tracker + mock score log
+├── review.html         ← Weekly review + math progress
+├── 404.html            ← Offline / not found fallback
+├── generate-icons.html ← Open in browser to create PNG icons
+├── style.css           ← Complete design system (all components)
+├── data.js             ← All data + schedule builder + shared utilities
+├── update.js           ← Real-time engine (window.U) + Google sync
+├── sw.js               ← Service worker (PWA offline + push)
+├── sw-register.js      ← SW registration snippet
+├── manifest.json       ← PWA manifest
+├── icon-192.png        ← PWA icon (generate with generate-icons.html)
+├── icon-512.png        ← PWA icon (generate with generate-icons.html)
+├── instructions.md     ← Full project documentation
+└── README.md           ← This file
 ```
-
-### 3. Push and enable GitHub Pages
-
-```bash
-git add .
-git commit -m "Initial deploy"
-git push -u origin main
-```
-
-Then go to **Settings → Pages → Source → main branch / root** and save.
-
-Your site will be live at `https://YOUR_USERNAME.github.io/sprint-os/`
 
 ---
 
-## 🔑 Enabling Google Drive + Calendar Sync (Optional)
+## Deploy to GitHub Pages
 
-The site works fully offline using `localStorage`. To enable cloud sync:
+### 1. Generate PWA icons first
 
-1. Go to [Google Cloud Console](https://console.cloud.google.com)
-2. Create a new project → enable **Google Drive API** and **Google Calendar API**
-3. Create **OAuth 2.0 credentials** (Web application type)
-4. Add your GitHub Pages URL to **Authorized JavaScript origins**
-5. Copy your **Client ID** and **API Key**
-6. Open `update.js` and replace:
+Open `generate-icons.html` in any browser. Click each download button. Save `icon-192.png` and `icon-512.png` to the repo root.
+
+### 2. Push and enable Pages
+
+```bash
+git add .
+git commit -m "Deploy Sprint OS v2"
+git push origin main
+```
+
+Settings → Pages → Source: **main branch / root** → Save.
+
+Live in ~60 seconds at `https://anwaydiptapaul.github.io/life-plan/`
+
+---
+
+## Google Drive + Calendar Sync (Optional)
+
+### Quick setup
+
+1. [console.cloud.google.com](https://console.cloud.google.com) → New project
+2. Enable **Google Drive API** + **Google Calendar API**
+3. Credentials → OAuth 2.0 Client ID (Web application)
+4. Add authorised origin: `https://anwaydiptapaul.github.io`
+5. Create an API Key, restrict to Drive + Calendar APIs
+6. In `update.js`, replace at the top:
 
 ```js
 const GAPI_CONFIG = {
-  clientId: 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com',
-  apiKey:   'YOUR_GOOGLE_API_KEY',
+  clientId: 'YOUR_CLIENT_ID.apps.googleusercontent.com',
+  apiKey:   'YOUR_API_KEY',
   ...
 };
 ```
 
-7. Commit and push.
+7. OAuth consent screen → add yourself as test user → add scopes:
+   - `https://www.googleapis.com/auth/drive.appdata`
+   - `https://www.googleapis.com/auth/calendar.events`
 
-When signed in, all state (course completions, milestone checks, savings updates) is saved to a private file in the user's Google Drive **appdata** folder (invisible to other apps) and calendar events are created in their primary Google Calendar.
+### What gets saved
 
----
-
-## 📁 File Reference
-
-| File | Purpose |
-|------|---------|
-| `index.html` | Live dashboard: greeting, NOW/NEXT block, countdowns, stats row, timeline, IELTS status panel |
-| `daily.html` | Today's schedule with order/free toggle, pre/post-IELTS toggle, tier display, weekly grid |
-| `courses.html` | Full course checklist across all 4 platforms with collapsible phase accordions |
-| `milestones.html` | Milestone tracker with SVG progress rings, IELTS score logger, category progress bars |
-| `savings.html` | Arc gauge savings tracker, log table, ETA calculator, scenario grid, pace tier cards |
-| `roadmap.html` | 18-month timeline, month-by-month table, period accordions with clickable goal cards |
-| `style.css` | Complete design token system, all component styles, responsive breakpoints |
-| `data.js` | All static data (courses, milestones, tiers, schedule builder), shared utilities, `buildNavHTML()`, `buildFooterHTML()`, `buildTimelineHTML()` |
-| `update.js` | `window.U` — real-time engine: device clock, phase detection, Google Drive sync, Google Calendar integration, auto-save manager, toast system |
+All state → single private file `sprint-os-state.json` in Drive appdata (only this app can read it). Includes: savings, milestone states, course states, math progress, OU checklist, IELTS score, mock scores, income log.
 
 ---
 
-## ⚙️ How It Works
+## PWA Installation
 
-- **No framework, no build step.** Pure HTML + CSS + vanilla JS.
-- **State** is stored in `localStorage` and optionally synced to Google Drive appdata.
-- **`window.U`** is the global update engine, available on every page.
-- **`window.S`** is the savings state object (bdt, monthly, save(), eur(), pct()).
-- **`getTier()`**, **`buildSchedule()`**, **`PHASES`**, **`MILESTONES`** etc. are all available globally from `data.js`.
-- The **live clock** (`U.Ticker`) updates every second, highlighting the current schedule block and updating countdowns.
-- **Google sync** is entirely non-blocking — the UI works instantly from localStorage and Drive loads asynchronously.
+1. Open the live site in Chrome (Android) or Safari (iOS)
+2. Android: Menu → "Add to Home Screen"
+3. iOS: Share → "Add to Home Screen"
+4. Desktop Chrome: install icon in address bar
+
+Works fully offline once installed — all pages cached by service worker.
+
+---
+
+## Push Notifications
+
+Click **Enable Notifications** on the Dashboard. Sprint OS will notify you:
+- 5 minutes before each schedule block starts
+- When edX expiry is ≤ 3 days away
+- Saturday IELTS mock reminder
+- Phase-switch suggestion when IELTS date passes
+
+---
+
+## Local Development
+
+```bash
+python3 -m http.server 8080
+# then open: http://localhost:8080/
+```
+
+---
+
+## Architecture
+
+- **No framework.** Pure HTML + CSS + vanilla JS.
+- **`window.U`** — global runtime (update.js)
+- **`window.S`** — savings state (data.js)
+- All data and schedule logic → `data.js`
+- All mutation, sync, notifications → `update.js`
+- Pages communicate via `document.dispatchEvent`
+- State stored in `localStorage`, optionally mirrored to Google Drive
+- Service worker caches all shell files on install
+
+See `instructions.md` for the complete technical reference.
+
+---
+
+*Sprint OS v2 · Built May 2026 · Target: OU MPhys Application Nov 2027*

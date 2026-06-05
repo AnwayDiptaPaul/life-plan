@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sprint OS · Habits</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.habits-layout{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.mock-section{background:var(--bg2);border:1px solid var(--border2);border-top:2px solid var(--amber);border-radius:var(--r);padding:18px 20px;margin-bottom:18px}
+.mock-add-row{display:grid;grid-template-columns:repeat(5,1fr) auto;gap:8px;margin-top:12px}
+.score-trend{display:flex;align-items:flex-end;gap:3px;height:60px;margin-top:10px;margin-bottom:4px}
+.trend-bar{flex:1;border-radius:2px 2px 0 0;min-width:12px;transition:height .4s ease;position:relative;cursor:default}
+.trend-bar::after{content:attr(data-val);position:absolute;bottom:calc(100% + 3px);left:50%;transform:translateX(-50%);font-size:8px;color:var(--text3);white-space:nowrap}
+.streak-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;padding:3px 9px;border-radius:2px;border:1px solid;font-weight:600}
+.streak-badge.green{color:var(--green);border-color:rgba(0,229,160,.35);background:rgba(0,229,160,.08)}
+.streak-badge.amber{color:var(--amber);border-color:rgba(255,176,32,.35);background:rgba(255,176,32,.08)}
+@media(max-width:760px){.habits-layout{grid-template-columns:1fr}.mock-add-row{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div id="nav-ph"></div>
+<main class="main fade-in">
+
+  <div class="page-header">
+    <div>
+      <div class="ph-eyebrow">Daily Tracking</div>
+      <div class="ph-title">Habits &amp; <span class="accent">Mock Scores</span></div>
+      <div class="ph-sub">
+        <span class="ph-tag"><span class="ph-dot" style="background:var(--green)"></span><span>Track today's habits</span></span>
+        <span class="ph-tag"><span class="ph-dot" style="background:var(--amber)"></span><span>Log IELTS mock scores</span></span>
+        <span class="ph-tag"><span class="ph-dot" style="background:var(--blue)"></span><span>84-day heatmap</span></span>
+      </div>
+    </div>
+    <div class="ph-meta"><div class="ph-month-big" id="ph-month">—</div><div class="ph-month-label">Plan Month / 18</div></div>
+  </div>
+
+  <div class="habits-layout">
+    <!-- TODAY'S HABITS -->
+    <div>
+      <div class="sec-head"><div class="sec-title">Today's Habits</div><div class="sec-line"></div><div class="sec-tag green" id="today-score-tag">0 / 5</div></div>
+      <div class="alert info" style="margin-bottom:14px">
+        <span class="alert-icon">ℹ</span>Check off each habit you complete today. Resets at midnight. Builds the heatmap below.
+      </div>
+      <div id="habit-list"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px" id="streaks-wrap"></div>
+    </div>
+
+    <!-- DAILY STATS -->
+    <div>
+      <div class="sec-head"><div class="sec-title">Today's Summary</div><div class="sec-line"></div></div>
+      <div style="display:flex;flex-direction:column;gap:10px" id="today-summary">
+        <div class="card"><div class="card-label">edX Deadline</div><div class="card-value red" id="sum-edx">—</div><div class="card-sub">days remaining</div></div>
+        <div class="card"><div class="card-label">IELTS Target</div><div class="card-value amber" id="sum-ielts">—</div><div class="card-sub">days to July 2026</div></div>
+        <div class="card"><div class="card-label">Current Phase</div><div class="card-value" id="sum-phase" style="color:var(--green)">—</div><div class="card-sub" id="sum-phase-sub">—</div></div>
+        <div class="card"><div class="card-label">Today's Tier</div><div class="card-value" id="sum-tier" style="color:var(--orange)">—</div><div class="card-sub" id="sum-tier-range">—</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEATMAP -->
+  <div class="sec-head"><div class="sec-title">84-Day Habit Heatmap</div><div class="sec-line"></div><div class="sec-tag dim">last 12 weeks</div></div>
+  <div class="card" style="margin-bottom:22px">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:10px;color:var(--text3)">
+      <span>Less</span>
+      <span style="display:flex;gap:3px">
+        <span style="width:12px;height:12px;border-radius:2px;background:var(--border2);display:inline-block"></span>
+        <span style="width:12px;height:12px;border-radius:2px;background:rgba(0,229,160,.2);display:inline-block"></span>
+        <span style="width:12px;height:12px;border-radius:2px;background:rgba(0,229,160,.45);display:inline-block"></span>
+        <span style="width:12px;height:12px;border-radius:2px;background:rgba(0,229,160,.7);display:inline-block"></span>
+        <span style="width:12px;height:12px;border-radius:2px;background:var(--green);display:inline-block"></span>
+      </span>
+      <span>More</span>
+      <span style="margin-left:auto;font-size:9px" id="heatmap-legend">— habit-days tracked</span>
+    </div>
+    <div class="heatmap-wrap">
+      <div class="heatmap-grid" id="heatmap"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text3);margin-top:6px;letter-spacing:.08em">
+      <span id="hm-start-lbl">12 weeks ago</span><span>Today</span>
+    </div>
+  </div>
+
+  <!-- IELTS MOCK SCORES -->
+  <div class="mock-section">
+    <div style="font-family:var(--font-display);font-size:1.1rem;letter-spacing:.05em;margin-bottom:4px">📝 IELTS Mock Score Log</div>
+    <div style="font-size:10px;color:var(--text3);margin-bottom:12px">Log every Saturday mock test. Track progress toward Band 7.0.</div>
+
+    <!-- Trend chart -->
+    <div class="sec-head" style="margin-top:0"><div class="sec-title" style="font-size:.9rem">Overall Band Trend</div><div class="sec-line"></div><div class="sec-tag amber" id="mock-trend-tag">— mocks logged</div></div>
+    <div class="score-trend" id="score-trend"></div>
+    <div style="font-size:9px;color:var(--text3);margin-bottom:14px;display:flex;gap:12px" id="trend-labels"></div>
+
+    <!-- Add new score -->
+    <div class="alert info" style="margin-bottom:10px"><span class="alert-icon">+</span>Add this week's mock test result:</div>
+    <div class="mock-add-row">
+      <div><div style="font-size:9px;color:var(--text3);margin-bottom:3px">Listening</div><input class="field" type="number" id="ml" step="0.5" min="0" max="9" placeholder="—"/></div>
+      <div><div style="font-size:9px;color:var(--text3);margin-bottom:3px">Reading</div><input class="field" type="number" id="mr" step="0.5" min="0" max="9" placeholder="—"/></div>
+      <div><div style="font-size:9px;color:var(--text3);margin-bottom:3px">Writing</div><input class="field" type="number" id="mw" step="0.5" min="0" max="9" placeholder="—"/></div>
+      <div><div style="font-size:9px;color:var(--text3);margin-bottom:3px">Speaking</div><input class="field" type="number" id="ms-in" step="0.5" min="0" max="9" placeholder="—"/></div>
+      <div><div style="font-size:9px;color:var(--text3);margin-bottom:3px">Week #</div><input class="field" type="number" id="mweek" min="1" placeholder="e.g. 1" id="mock-week"/></div>
+      <button class="btn btn-primary" onclick="addMock()" style="align-self:flex-end">Add</button>
+    </div>
+
+    <!-- Score list -->
+    <div style="margin-top:14px" id="mock-list"></div>
+  </div>
+
+</main>
+<div id="footer-ph"></div>
+<script src="data.js"></script><script src="update.js"></script>
+<script async defer src="https://apis.google.com/js/api.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('nav-ph').innerHTML    = buildNavHTML('habits.html');
+  document.getElementById('footer-ph').innerHTML = buildFooterHTML();
+  document.getElementById('ph-month').textContent = planMonth();
+  refreshUI();
+});
+['ui:refresh','state:loaded'].forEach(e => document.addEventListener(e, refreshUI));
+
+const TODAY_STR = new Date().toISOString().slice(0,10);
+
+function toggleHabit(key) {
+  toggleHabit(TODAY_STR, key); // data.js function
+  renderHabits(); renderHeatmap();
+}
+// Override: data.js exports toggleHabit(dateStr, key), but we want local shortcut
+function doToggle(key) {
+  const h = getHabits(TODAY_STR);
+  h[key] = !h[key];
+  setHabits(TODAY_STR, h);
+  U.save();
+  renderHabits(); renderHeatmap();
+}
+
+function calcStreak(key) {
+  let streak = 0, d = new Date();
+  while (true) {
+    const ds = d.toISOString().slice(0,10);
+    const h  = getHabits(ds);
+    if (!h[key]) break;
+    streak++;
+    d.setDate(d.getDate()-1);
+    if (streak > 365) break;
+  }
+  return streak;
+}
+
+function renderHabits() {
+  const h = getHabits(TODAY_STR);
+  const done = HABIT_KEYS.filter(k => h[k]).length;
+  document.getElementById('today-score-tag').textContent = done + ' / ' + HABIT_KEYS.length;
+
+  document.getElementById('habit-list').innerHTML = HABIT_KEYS.map(key => {
+    const isDone = !!h[key];
+    const streak = calcStreak(key);
+    return `<div class="habit-row ${isDone?'done':''}" onclick="doToggle('${key}')">
+      <div class="habit-check">${isDone?'✓':''}</div>
+      <div class="habit-label">${HABIT_LABELS[key]}</div>
+      ${streak>0?`<span class="habit-streak">🔥 ${streak}d</span>`:''}
+    </div>`;
+  }).join('');
+
+  // Streaks summary
+  const streaks = HABIT_KEYS.map(k => ({k, s:calcStreak(k)})).filter(x => x.s > 0);
+  document.getElementById('streaks-wrap').innerHTML = streaks.map(x => {
+    const cls = x.s >= 7 ? 'green' : 'amber';
+    return `<span class="streak-badge ${cls}">🔥 ${HABIT_LABELS[x.k]}: ${x.s} days</span>`;
+  }).join('');
+}
+
+function renderHeatmap() {
+  const history = getHabitHistory(84);
+  const grid    = document.getElementById('heatmap');
+  const total   = history.reduce((a,d) => a+d.count, 0);
+  document.getElementById('heatmap-legend').textContent = total + ' habit-days tracked';
+
+  if (history.length > 0) {
+    const startDate = new Date(history[0].date);
+    document.getElementById('hm-start-lbl').textContent = startDate.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+  }
+
+  grid.innerHTML = history.map(d => {
+    const level = d.count === 0 ? 0 : d.count === 1 ? 1 : d.count === 2 ? 2 : d.count === 3 ? 3 : d.count === 4 ? 4 : 5;
+    const label = new Date(d.date).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}) + ': ' + d.count + '/' + HABIT_KEYS.length + ' habits';
+    return `<div class="heatmap-cell hm-${level}" title="${label}" style="position:relative" onmouseenter="showTip(this,'${label}')" onmouseleave="hideTip(this)"></div>`;
+  }).join('');
+}
+
+function showTip(el, text) {
+  const t = document.createElement('div');
+  t.className = 'heatmap-tooltip'; t.textContent = text;
+  el.appendChild(t);
+}
+function hideTip(el) { el.querySelector('.heatmap-tooltip')?.remove(); }
+
+function addMock() {
+  const l = parseFloat(document.getElementById('ml').value);
+  const r = parseFloat(document.getElementById('mr').value);
+  const w = parseFloat(document.getElementById('mw').value);
+  const s = parseFloat(document.getElementById('ms-in').value);
+  const wk= parseInt(document.getElementById('mweek').value) || getMockScores().length + 1;
+  const vals = [l,r,w,s].filter(v => !isNaN(v));
+  if (vals.length < 1) { alert('Enter at least one band score.'); return; }
+  const overall = Math.round(vals.reduce((a,b)=>a+b,0)/vals.length * 2) / 2;
+  addMockScore({
+    date: new Date().toLocaleDateString('en-GB'),
+    week: wk,
+    listening: isNaN(l)?null:l,
+    reading:   isNaN(r)?null:r,
+    writing:   isNaN(w)?null:w,
+    speaking:  isNaN(s)?null:s,
+    overall,
+  });
+  ['ml','mr','mw','ms-in','mweek'].forEach(id => document.getElementById(id).value='');
+  U.save();
+  renderMocks();
+}
+
+function renderMocks() {
+  const scores = getMockScores();
+  document.getElementById('mock-trend-tag').textContent = scores.length + ' mock' + (scores.length!==1?'s':'') + ' logged';
+
+  // Trend chart
+  const recent = scores.slice(-12);
+  const maxBand = 9;
+  document.getElementById('score-trend').innerHTML = recent.map((sc,i) => {
+    const h    = Math.round(sc.overall/maxBand*100);
+    const col  = sc.overall >= 7 ? 'var(--green)' : sc.overall >= 6.5 ? 'var(--teal)' : sc.overall >= 6 ? 'var(--amber)' : 'var(--red)';
+    return `<div class="trend-bar" style="height:${Math.max(h,8)}%;background:${col}" data-val="${sc.overall}" title="Week ${sc.week}: ${sc.overall}"></div>`;
+  }).join('');
+  document.getElementById('trend-labels').innerHTML = recent.map(sc =>
+    `<span style="flex:1;text-align:center;font-size:8px;color:var(--text3)">W${sc.week}</span>`
+  ).join('');
+
+  // Score list
+  const listEl = document.getElementById('mock-list');
+  if (!scores.length) {
+    listEl.innerHTML = '<div style="font-size:11px;color:var(--text3);padding:12px 0">No mock scores logged yet. Log your first Saturday mock.</div>';
+    return;
+  }
+  listEl.innerHTML = `<div style="display:flex;flex-direction:column;gap:4px">` +
+    [...scores].reverse().map((sc, ri) => {
+      const i = scores.length - 1 - ri;
+      const cls = sc.overall >= 7 ? '' : sc.overall >= 6 ? 'below' : 'fail';
+      const bands = [
+        {l:'L', v:sc.listening},
+        {l:'R', v:sc.reading},
+        {l:'W', v:sc.writing},
+        {l:'S', v:sc.speaking},
+      ].filter(b => b.v !== null);
+      return `<div class="mock-score-row">
+        <div class="mock-band ${cls}">${sc.overall}</div>
+        <div class="mock-bars-wrap">
+          ${bands.map(b => {
+            const pct  = Math.round((b.v||0)/9*100);
+            const bcol = (b.v||0)>=7?'var(--green)':(b.v||0)>=6?'var(--amber)':'var(--red)';
+            return `<div class="mock-bar-item">
+              <div class="mock-bar-label">${b.l} ${b.v||'—'}</div>
+              <div class="mock-bar-track"><div class="mock-bar-fill" style="width:${pct}%;background:${bcol}"></div></div>
+            </div>`;
+          }).join('')}
+        </div>
+        <div class="mock-date">Week ${sc.week}<br>${sc.date}</div>
+        <span class="mock-del" onclick="delMock(${i})">✕</span>
+      </div>`;
+    }).join('') + '</div>';
+}
+
+function delMock(i) {
+  deleteMockScore(i); U.save(); renderMocks();
+}
+
+function refreshUI() {
+  const t = getTier();
+  const pre = U.Phase.isPreIelts();
+  document.getElementById('sum-edx').textContent     = daysUntil(EDX_DATE);
+  document.getElementById('sum-ielts').textContent   = daysUntil(IELTS_DATE);
+  document.getElementById('sum-phase').textContent   = pre ? 'Pre-IELTS' : 'Post-IELTS';
+  document.getElementById('sum-phase-sub').textContent = pre ? 'IELTS owns morning block' : 'Math/Physics owns morning block';
+  document.getElementById('sum-phase').style.color   = pre ? 'var(--amber)' : 'var(--green)';
+  document.getElementById('sum-tier').textContent    = 'Tier '+t.id+' '+t.icon;
+  document.getElementById('sum-tier').style.color    = t.col;
+  document.getElementById('sum-tier-range').textContent = t.range;
+  renderHabits();
+  renderHeatmap();
+  renderMocks();
+}
+</script>
+</body>
+</html>

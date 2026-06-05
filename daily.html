@@ -1,25 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Sprint OS · Daily Schedule</title>
 <link rel="stylesheet" href="style.css">
 <style>
-.controls-bar {
-  display:flex; gap:8px; flex-wrap:wrap;
-  padding:14px 0; margin-bottom:18px;
-  border-bottom:1px solid var(--border2);
-}
-.two-col { display:grid; grid-template-columns:1.4fr 1fr; gap:20px; }
-.weekly-wrap { background:var(--bg2); border:1px solid var(--border2); border-radius:var(--radius); padding:20px; }
-@media(max-width:900px){ .two-col { grid-template-columns:1fr; } }
+.controls-bar{display:flex;gap:8px;flex-wrap:wrap;padding:12px 0;margin-bottom:16px;border-bottom:1px solid var(--border2)}
+.two-col{display:grid;grid-template-columns:1.5fr 1fr;gap:18px}
+.weekly-wrap{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:18px}
+@media(max-width:900px){.two-col{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<div id="nav-placeholder"></div>
+<div id="nav-ph"></div>
 <main class="main fade-in">
-
   <div class="page-header">
     <div>
       <div class="ph-eyebrow">Daily Planner</div>
@@ -30,176 +24,130 @@
         <span class="ph-tag"><span class="ph-dot" style="background:var(--orange)"></span><span id="ph-tier">—</span></span>
       </div>
     </div>
-    <div class="ph-meta">
-      <div class="ph-month-big" id="ph-month">—</div>
-      <div class="ph-month-label">Plan Month / 18</div>
-    </div>
+    <div class="ph-meta"><div class="ph-month-big" id="ph-month">—</div><div class="ph-month-label">Plan Month / 18</div></div>
   </div>
 
-  <!-- CONTROLS -->
   <div class="controls-bar">
-    <button class="ctrl active active-red" id="btn-order" onclick="toggleOrder()">
-      <span class="ctrl-dot"></span><span id="lbl-order">Order Work Today</span>
-    </button>
-    <button class="ctrl active active-amber" id="btn-phase" onclick="togglePhase()">
-      <span class="ctrl-dot"></span><span id="lbl-phase">Pre-IELTS Mode</span>
-    </button>
-    <div class="ctrl" style="cursor:default; border-color:var(--border2)">
-      <span id="lbl-tier">Tier 1 — Minimum Sprint</span>
-    </div>
-    <button class="btn btn-ghost" onclick="U.scheduleToday()" style="margin-left:auto">📅 Add to Calendar</button>
+    <button class="ctrl active-red" id="btn-order" onclick="toggleOrder()"><span class="ctrl-dot"></span><span id="lbl-order">Order Work Today</span></button>
+    <button class="ctrl active-amber" id="btn-phase" onclick="togglePhase()"><span class="ctrl-dot"></span><span id="lbl-phase">Pre-IELTS Mode</span></button>
+    <div class="ctrl" style="cursor:default"><span id="lbl-tier">Tier — Loading</span></div>
+    <button class="btn btn-ghost" style="margin-left:auto" onclick="U.scheduleToday()">📅 Add to Calendar</button>
   </div>
 
-  <!-- INTENSITY METER -->
   <div class="intensity">
-    <div class="int-header">
-      <span>Daily Intensity</span>
-      <span id="int-label">Tier 1/4</span>
-    </div>
+    <div class="int-header"><span>Daily Intensity</span><span id="int-lbl">—</span></div>
     <div class="int-track"><div class="int-fill" id="int-fill" style="width:25%"></div></div>
   </div>
-
-  <div class="alert" id="callout-box" style="margin-bottom:18px">
-    <span class="alert-icon">⚡</span>
-    <span id="callout-text">Loading...</span>
-  </div>
+  <div class="alert warn" id="callout"><span class="alert-icon">⚡</span><span id="callout-txt">Loading…</span></div>
 
   <div class="two-col">
-    <!-- SCHEDULE LIST -->
     <div>
-      <div class="sec-head">
-        <div class="sec-title">Schedule</div>
-        <div class="sec-line"></div>
-        <div class="sec-tag amber" id="sched-label">Order · Pre-IELTS · Tier 1</div>
-      </div>
+      <div class="sec-head"><div class="sec-title">Schedule</div><div class="sec-line"></div><div class="sec-tag amber" id="sched-lbl">—</div></div>
       <div class="sched-list" id="sched-list"></div>
-      <p class="footnote" style="margin-top:16px">
-        🎯 Pre-IELTS: IELTS owns the first study block daily — non-negotiable.<br>
-        📐 Post-IELTS: Math/Physics takes the morning. Toggle the phase button after your exam.<br>
-        ▶ NOW indicator updates every second. Sleep and meals are always protected.
-      </p>
+      <p class="footnote" style="margin-top:14px">🎯 Pre-IELTS: IELTS owns the first study block daily.<br>📐 Post-IELTS: Math/Physics takes the morning — toggle after exam.<br>▶ NOW updates every second. Sleep and meals are always protected.</p>
     </div>
-
-    <!-- WEEKLY SUMMARY -->
     <div>
       <div class="sec-head"><div class="sec-title">Weekly</div><div class="sec-line"></div><div class="sec-tag dim">Sprint Template</div></div>
-      <div class="weekly-wrap">
-        <div class="week-grid" id="week-grid"></div>
-      </div>
-      <div class="sec-head" style="margin-top:20px"><div class="sec-title">Block Key</div><div class="sec-line"></div></div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;font-size:11px">
-        <span class="day-blk db-work"  style="border-radius:2px;padding:3px 8px">Work/BIM</span>
-        <span class="day-blk db-study" style="border-radius:2px;padding:3px 8px">Courses</span>
-        <span class="day-blk db-math"  style="border-radius:2px;padding:3px 8px">Math/Physics</span>
-        <span class="day-blk db-self"  style="border-radius:2px;padding:3px 8px">IELTS</span>
-        <span class="day-blk db-thesis"style="border-radius:2px;padding:3px 8px">Thesis</span>
-        <span class="day-blk db-life"  style="border-radius:2px;padding:3px 8px">Culture</span>
-        <span class="day-blk db-rest"  style="border-radius:2px;padding:3px 8px">Rest</span>
+      <div class="weekly-wrap"><div class="week-grid" id="week-grid"></div></div>
+      <div class="sec-head" style="margin-top:18px"><div class="sec-title">Key</div><div class="sec-line"></div></div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;font-size:10.5px">
+        <span class="day-blk db-work"  style="border-radius:2px;padding:2px 7px">Work</span>
+        <span class="day-blk db-study" style="border-radius:2px;padding:2px 7px">Courses</span>
+        <span class="day-blk db-math"  style="border-radius:2px;padding:2px 7px">Math</span>
+        <span class="day-blk db-self"  style="border-radius:2px;padding:2px 7px">IELTS</span>
+        <span class="day-blk db-thesis"style="border-radius:2px;padding:2px 7px">Thesis</span>
+        <span class="day-blk db-life"  style="border-radius:2px;padding:2px 7px">Culture</span>
+        <span class="day-blk db-rest"  style="border-radius:2px;padding:2px 7px">Rest</span>
       </div>
     </div>
   </div>
-
 </main>
-<div id="footer-placeholder"></div>
-<script src="data.js"></script>
-<script src="update.js"></script>
-<script async defer src="https://apis.google.com/js/api.js" onload="U.init()"></script>
+<div id="footer-ph"></div>
+<script src="data.js"></script><script src="update.js"></script>
+<script async defer src="https://apis.google.com/js/api.js"></script>
 <script>
-window.addEventListener('load', () => { if(!window._gapiInitDone) U.init(); });
-
 const WEEKLY=[
   {d:"Mon",wknd:false,b:[{l:"IELTS 1–1.5hr",c:"db-self"},{l:"Work 8h",c:"db-work"},{l:"Courses 1.5–3h",c:"db-study"},{l:"IELTS Review",c:"db-self"}]},
   {d:"Tue",wknd:false,b:[{l:"IELTS 1–1.5hr",c:"db-self"},{l:"Work 8h",c:"db-work"},{l:"Courses 1.5–3h",c:"db-study"},{l:"Math 30m",c:"db-math"}]},
   {d:"Wed",wknd:false,b:[{l:"IELTS 1–1.5hr",c:"db-self"},{l:"Work 8h",c:"db-work"},{l:"Courses 1.5–3h",c:"db-study"},{l:"Thesis",c:"db-thesis"}]},
   {d:"Thu",wknd:false,b:[{l:"IELTS Writing",c:"db-self"},{l:"Work 8h",c:"db-work"},{l:"Courses 1.5–3h",c:"db-study"},{l:"Math 30m",c:"db-math"}]},
   {d:"Fri",wknd:false,b:[{l:"IELTS Mock",c:"db-self"},{l:"Work 8h",c:"db-work"},{l:"Courses 1.5–3h",c:"db-study"},{l:"Weekly Review",c:"db-rest"}]},
-  {d:"Sat",wknd:true, b:[{l:"★ Full Mock Test",c:"db-self"},{l:"Score Review",c:"db-self"},{l:"Thesis 2hr",c:"db-thesis"},{l:"Math 1hr",c:"db-math"}]},
-  {d:"Sun",wknd:true, b:[{l:"Rest + Reset",c:"db-rest"},{l:"Admin & Finance",c:"db-rest"},{l:"Plan Next Week",c:"db-rest"},{l:"Light Reading",c:"db-life"}]},
+  {d:"Sat",wknd:true, b:[{l:"★ Full Mock",c:"db-self"},{l:"Score Review",c:"db-self"},{l:"Thesis 2hr",c:"db-thesis"},{l:"Math 1hr",c:"db-math"}]},
+  {d:"Sun",wknd:true, b:[{l:"Rest + Reset",c:"db-rest"},{l:"Admin/Finance",c:"db-rest"},{l:"Plan Next Week",c:"db-rest"},{l:"Light Reading",c:"db-life"}]},
 ];
 
 document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('nav-placeholder').innerHTML    = buildNavHTML('daily.html');
-  document.getElementById('footer-placeholder').innerHTML = buildFooterHTML();
+  document.getElementById('nav-ph').innerHTML    = buildNavHTML('daily.html');
+  document.getElementById('footer-ph').innerHTML = buildFooterHTML();
   document.getElementById('week-grid').innerHTML = WEEKLY.map(d =>
-    `<div class="day-col${d.wknd?' weekend':''}"><div class="day-name">${d.d}</div>
-     ${d.b.map(b=>`<div class="day-blk ${b.c}">${b.l}</div>`).join('')}</div>`
+    `<div class="day-col${d.wknd?' weekend':''}"><div class="day-name">${d.d}</div>${d.b.map(b=>`<div class="day-blk ${b.c}">${b.l}</div>`).join('')}</div>`
   ).join('');
   refreshUI();
 });
-document.addEventListener('ui:refresh', refreshUI);
-document.addEventListener('routine:refresh', refreshUI);
-
-let _order = U.Routine.hasOrder();
-let _pre   = U.Phase.isPreIelts();
+['ui:refresh','routine:refresh'].forEach(e => document.addEventListener(e, refreshUI));
 
 function toggleOrder() {
-  _order = !_order;
-  U.Routine.setOrder(_order);
+  const v = !U.Routine.hasOrder(); U.Routine.setOrder(v);
   const b = document.getElementById('btn-order');
-  b.className = 'ctrl active ' + (_order ? 'active-red' : 'active-green');
-  document.getElementById('lbl-order').textContent = _order ? 'Order Work Today' : 'Free Day — No Orders';
+  b.className = 'ctrl ' + (v ? 'active-red' : 'active-green');
+  document.getElementById('lbl-order').textContent = v ? 'Order Work Today' : 'Free Day';
   refreshUI();
 }
 function togglePhase() {
-  _pre = !_pre;
-  localStorage.setItem('pre_ielts', String(_pre));
+  const v = !U.Phase.isPreIelts(); localStorage.setItem('pre_ielts', String(v));
   const b = document.getElementById('btn-phase');
-  b.className = 'ctrl active ' + (_pre ? 'active-amber' : 'active-blue');
-  document.getElementById('lbl-phase').textContent = _pre ? 'Pre-IELTS Mode' : 'Post-IELTS Mode';
+  b.className = 'ctrl ' + (v ? 'active-amber' : 'active-blue');
+  document.getElementById('lbl-phase').textContent = v ? 'Pre-IELTS Mode' : 'Post-IELTS Mode';
   refreshUI();
 }
 
 function refreshUI() {
-  _order = U.Routine.hasOrder();
-  _pre   = U.Phase.isPreIelts();
+  const order = U.Routine.hasOrder();
+  const pre   = U.Phase.isPreIelts();
   const t     = getTier();
-  const sched = buildSchedule(_order, _pre, t);
-  const today = new Date();
+  const sched = buildSchedule(order, pre, t);
+  const cur   = U.Clock.currentBlock(sched);
 
-  document.getElementById('ph-date').textContent  = today.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
-  document.getElementById('ph-mode').textContent  = _pre ? 'Pre-IELTS Mode' : 'Post-IELTS Mode';
-  document.getElementById('ph-tier').textContent  = 'Tier ' + t.id + ' — ' + t.name;
-  document.getElementById('ph-month').textContent = U.Phase.planMonth();
-  document.getElementById('lbl-tier').textContent = 'Tier ' + t.id + ' ' + t.icon + ' — ' + t.name;
-  document.getElementById('sched-label').textContent = (_order ? 'Order' : 'Free') + ' · ' + (_pre ? 'Pre-IELTS' : 'Post-IELTS') + ' · ' + t.name;
+  document.getElementById('ph-date').textContent  = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+  document.getElementById('ph-mode').textContent  = pre ? 'Pre-IELTS' : 'Post-IELTS';
+  document.getElementById('ph-tier').textContent  = 'Tier '+t.id+' — '+t.name;
+  document.getElementById('ph-month').textContent = planMonth();
+  document.getElementById('lbl-tier').textContent = 'Tier '+t.id+' '+t.icon+' — '+t.name;
+  document.getElementById('sched-lbl').textContent= (order?'Order':'Free')+' · '+(pre?'Pre-IELTS':'Post-IELTS')+' · '+t.name;
 
-  // Intensity
-  const pcts = { preOrder:[25,50,75,100], preFree:85, postOrder:[35,60,80,100], postFree:95 };
-  let pct = _pre ? (_order ? pcts.preOrder[t.id-1] : pcts.preFree) : (_order ? pcts.postOrder[t.id-1] : pcts.postFree);
+  const pcts={preOrder:[25,50,75,100],preFree:85,postOrder:[35,60,80,100],postFree:95};
+  const pct = pre ? (order ? pcts.preOrder[t.id-1] : pcts.preFree) : (order ? pcts.postOrder[t.id-1] : pcts.postFree);
   const fill = document.getElementById('int-fill');
-  fill.style.width = pct + '%';
+  fill.style.width      = pct+'%';
   fill.style.background = `linear-gradient(90deg,${t.col},var(--amber))`;
-  document.getElementById('int-label').textContent = 'Tier ' + t.id + '/4 · ' + t.name;
+  document.getElementById('int-lbl').textContent = 'Tier '+t.id+'/4 · '+t.name;
 
-  // Callout
-  const callouts = {
-    preOrder:{1:'<strong>Pre-IELTS · Order · Tier 1:</strong> IELTS 1.5 hr split. Courses 1.5 hr. Math 30 min. Work 8 hr.',
-              2:'<strong>Pre-IELTS · Order · Tier 2:</strong> IELTS 1.5 hr AM. Courses 2 hr. Math 30 min. Work 8 hr.',
-              3:'<strong>Pre-IELTS · Order · Tier 3:</strong> IELTS 1.5 hr AM. Courses 2.5 hr. Math 30 min. Work 8 hr.',
-              4:'<strong>Pre-IELTS · Order · Tier 4:</strong> IELTS 1.5 hr AM. Courses 3 hr. Math 30 min. Work 8 hr.'},
-    preFree: '<strong>Pre-IELTS · Free Day:</strong> IELTS 3 hr (mock+review). Math 2 hr. Courses 3.5 hr. Thesis 2 hr.',
-    postOrder:{1:'<strong>Post-IELTS · Order · Tier 1:</strong> Math 45 min AM. Courses 2.25 hr (split). Thesis 35 min. Work 8 hr.',
-               2:'<strong>Post-IELTS · Order · Tier 2:</strong> Math 1 hr AM. Courses 3 hr (split). Thesis 35 min. Work 8 hr.',
-               3:'<strong>Post-IELTS · Order · Tier 3:</strong> Math 1 hr AM. Courses 4 hr (split). Thesis 30 min. Work 8 hr.',
-               4:'<strong>Post-IELTS · Order · Tier 4:</strong> Math 1.5 hr AM. Courses 4.5 hr (split). Work 8 hr.'},
-    postFree: '<strong>Post-IELTS · Free Day:</strong> Math 2.5 hr. Courses 6 hr. Thesis 2.5 hr. Maximum sprint.',
+  const callouts={
+    preOrder:{1:'<strong>Pre-IELTS · Order · T1:</strong> IELTS 1.5hr split. Courses 1.5hr. Math 30min. Work 8hr.',
+              2:'<strong>Pre-IELTS · Order · T2:</strong> IELTS 1.5hr AM. Courses 2hr. Math 30min. Work 8hr.',
+              3:'<strong>Pre-IELTS · Order · T3:</strong> IELTS 1.5hr AM. Courses 2.5hr. Math 30min. Work 8hr.',
+              4:'<strong>Pre-IELTS · Order · T4:</strong> IELTS 1.5hr AM. Courses 3hr. Math 30min. Work 8hr.'},
+    preFree:'<strong>Pre-IELTS · Free:</strong> IELTS 3hr (mock+review). Math 2hr. Courses 3.5hr. Thesis 2hr.',
+    postOrder:{1:'<strong>Post-IELTS · Order · T1:</strong> Math 45min AM. Courses 2.25hr. Thesis 35min. Work 8hr.',
+               2:'<strong>Post-IELTS · Order · T2:</strong> Math 1hr AM. Courses 3hr. Thesis 35min. Work 8hr.',
+               3:'<strong>Post-IELTS · Order · T3:</strong> Math 1hr AM. Courses 4hr. Thesis 30min. Work 8hr.',
+               4:'<strong>Post-IELTS · Order · T4:</strong> Math 1.5hr AM. Courses 4.5hr. Work 8hr.'},
+    postFree:'<strong>Post-IELTS · Free:</strong> Math 2.5hr. Courses 6hr. Thesis 2.5hr. Maximum sprint.',
   };
-  let co = _pre ? (_order ? callouts.preOrder[t.id] : callouts.preFree) : (_order ? callouts.postOrder[t.id] : callouts.postFree);
-  const cb = document.getElementById('callout-box');
-  cb.className = 'alert ' + (_order ? 'warn' : 'ok');
-  document.getElementById('callout-text').innerHTML = co;
+  let co = pre ? (order ? callouts.preOrder[t.id] : callouts.preFree) : (order ? callouts.postOrder[t.id] : callouts.postFree);
+  const cb = document.getElementById('callout');
+  cb.className = 'alert ' + (order ? 'warn' : 'ok');
+  document.getElementById('callout-txt').innerHTML = co;
 
-  // Schedule list
-  const cur = U.Clock.currentBlock(sched);
-  document.getElementById('sched-list').innerHTML = sched.map(r => {
+  document.getElementById('sched-list').innerHTML = sched.map((r,i) => {
     const isNow = cur && r.t === cur.t;
     return `<div class="sched-row ${r.cls}${isNow?' sched-now':''}">
       <div class="sched-time">${r.t}</div>
       <div class="sched-body">
-        ${isNow ? '<span class="now-badge">▶ NOW</span>' : ''}
+        ${isNow?'<span class="now-badge">▶ NOW</span>':''}
         <div class="sched-name">${r.n}</div>
         <div class="sched-note">${r.d}</div>
-        <span class="sched-tag stag-${r.tag}">${r.tag === 'ielts' ? '★ IELTS' : r.tag}</span>
+        <span class="sched-tag stag-${r.tag}">${r.tag==='ielts'?'★ IELTS':r.tag}</span>
       </div>
     </div>`;
   }).join('');

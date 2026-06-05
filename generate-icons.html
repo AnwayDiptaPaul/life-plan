@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sprint OS Icon Generator</title>
+<style>
+body{background:#080c10;color:#c8d4e8;font-family:monospace;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:20px;padding:20px}
+canvas{border:1px solid #2e3a50;border-radius:4px}
+button{font-family:monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;border:1px solid #00e5a0;background:rgba(0,229,160,.1);color:#00e5a0;padding:8px 16px;cursor:pointer;border-radius:2px}
+button:hover{background:#00e5a0;color:#000}
+p{font-size:11px;color:#4a5878;text-align:center;max-width:440px;line-height:1.7}
+</style>
+</head>
+<body>
+<h2 style="font-size:1.2rem;letter-spacing:.08em;color:#00e5a0">Sprint OS Icon Generator</h2>
+<p>Click each button to download the icon. Save both files to your sprint-os/ folder before deploying to GitHub Pages.</p>
+<canvas id="c192" width="192" height="192"></canvas>
+<button onclick="dl('c192','icon-192.png')">Download icon-192.png</button>
+<canvas id="c512" width="512" height="512"></canvas>
+<button onclick="dl('c512','icon-512.png')">Download icon-512.png</button>
+<script>
+function drawIcon(canvas) {
+  const ctx = canvas.getContext('2d');
+  const S   = canvas.width;
+  const r   = S * 0.12; // corner radius
+
+  // Background
+  ctx.fillStyle = '#080c10';
+  roundRect(ctx, 0, 0, S, S, r);
+  ctx.fill();
+
+  // Green accent border
+  ctx.strokeStyle = '#00e5a0';
+  ctx.lineWidth   = S * 0.025;
+  roundRect(ctx, S*0.025, S*0.025, S*0.95, S*0.95, r*0.9);
+  ctx.stroke();
+
+  // Grid lines (subtle)
+  ctx.strokeStyle = 'rgba(0,229,160,.06)';
+  ctx.lineWidth   = 1;
+  const grid = S / 6;
+  for (let i = 1; i < 6; i++) {
+    ctx.beginPath(); ctx.moveTo(i*grid, 0); ctx.lineTo(i*grid, S); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, i*grid); ctx.lineTo(S, i*grid); ctx.stroke();
+  }
+
+  // Clipped pentagon logo shape (top-right cut)
+  const cx = S * 0.5, cy = S * 0.48;
+  const ps = S * 0.3; // pentagon size
+  ctx.beginPath();
+  ctx.moveTo(cx - ps, cy - ps * 0.7);         // top-left
+  ctx.lineTo(cx + ps * 0.65, cy - ps * 0.7);  // top-right
+  ctx.lineTo(cx + ps, cy);                     // mid-right (cut)
+  ctx.lineTo(cx + ps * 0.7, cy + ps * 0.7);   // bottom-right
+  ctx.lineTo(cx - ps, cy + ps * 0.7);          // bottom-left
+  ctx.closePath();
+  ctx.fillStyle = '#00e5a0';
+  ctx.fill();
+
+  // "S" letter inside the shape
+  ctx.font = `bold ${S * 0.32}px 'Impact', sans-serif`;
+  ctx.fillStyle = '#000';
+  ctx.textAlign    = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('S', cx - S*0.01, cy + S*0.01);
+
+  // Bottom label
+  ctx.font         = `${S * 0.07}px monospace`;
+  ctx.fillStyle    = '#4a5878';
+  ctx.textAlign    = 'center';
+  ctx.textBaseline = 'bottom';
+  ctx.fillText('SPRINT OS', S/2, S * 0.93);
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.arcTo(x + w, y, x + w, y + r, r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+  ctx.lineTo(x + r, y + h);
+  ctx.arcTo(x, y + h, x, y + h - r, r);
+  ctx.lineTo(x, y + r);
+  ctx.arcTo(x, y, x + r, y, r);
+  ctx.closePath();
+}
+
+function dl(canvasId, filename) {
+  const canvas = document.getElementById(canvasId);
+  const a = document.createElement('a');
+  a.download = filename;
+  a.href     = canvas.toDataURL('image/png');
+  a.click();
+}
+
+// Draw both icons on load
+drawIcon(document.getElementById('c192'));
+drawIcon(document.getElementById('c512'));
+</script>
+</body>
+</html>

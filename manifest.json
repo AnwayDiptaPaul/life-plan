@@ -1,0 +1,56 @@
+{
+  "name": "Sprint OS — OU MPhys Plan",
+  "short_name": "Sprint OS",
+  "description": "Anway's 18-month personal command center for OU MPhys admission",
+  "start_url": "/life-plan/index.html",
+  "scope": "/life-plan/",
+  "display": "standalone",
+  "background_color": "#080c10",
+  "theme_color": "#00e5a0",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Daily Schedule",
+      "short_name": "Daily",
+      "description": "View today's schedule",
+      "url": "/life-plan/daily.html",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Courses",
+      "short_name": "Courses",
+      "description": "Course checklist",
+      "url": "/life-plan/courses.html",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Savings",
+      "short_name": "Savings",
+      "description": "Savings tracker",
+      "url": "/life-plan/savings.html",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Habits",
+      "short_name": "Habits",
+      "description": "Daily habit tracker",
+      "url": "/life-plan/habits.html",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "categories": ["productivity", "education", "lifestyle"]
+}

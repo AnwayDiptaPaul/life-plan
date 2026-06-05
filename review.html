@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sprint OS · Weekly Review</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.review-layout{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:22px}
+.review-section{background:var(--bg2);border:1px solid var(--border2);border-top:2px solid var(--green);border-radius:var(--r);padding:18px 22px}
+.review-field-label{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--text3);margin-bottom:5px;margin-top:12px}
+.review-field-label:first-child{margin-top:0}
+.r-log-item{border:1px solid var(--border2);border-radius:var(--r);padding:13px 16px;margin-bottom:8px;background:var(--bg1);transition:border-color .14s}
+.r-log-item:hover{border-color:var(--border3)}
+.r-log-week{font-family:var(--font-display);font-size:1.1rem;letter-spacing:.04em;color:var(--amber);margin-bottom:2px}
+.r-log-date{font-size:9px;color:var(--text3);margin-bottom:8px;letter-spacing:.08em}
+.r-log-section{font-size:10px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-top:8px;margin-bottom:3px}
+.r-log-content{font-size:11px;color:var(--text2);line-height:1.6}
+.r-log-del{float:right;color:var(--red);cursor:pointer;opacity:.4;font-size:11px}
+.r-log-del:hover{opacity:1}
+@media(max-width:760px){.review-layout{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="nav-ph"></div>
+<main class="main fade-in">
+
+  <div class="page-header">
+    <div>
+      <div class="ph-eyebrow">Sunday Session</div>
+      <div class="ph-title">Weekly <span class="accent">Review</span></div>
+      <div class="ph-sub">
+        <span class="ph-tag"><span class="ph-dot" style="background:var(--green)"></span><span>Reflect · Plan · Log</span></span>
+        <span class="ph-tag"><span class="ph-dot" style="background:var(--amber)"></span><span>Every Sunday after reset</span></span>
+      </div>
+    </div>
+    <div class="ph-meta"><div class="ph-month-big" id="ph-month">—</div><div class="ph-month-label">Plan Month / 18</div></div>
+  </div>
+
+  <div class="alert info">
+    <span class="alert-icon">📋</span>
+    <strong>Sunday ritual:</strong> Do this after your rest and admin. Takes 10–15 min. Builds self-awareness and keeps the plan calibrated.
+  </div>
+
+  <div class="review-layout">
+    <!-- REVIEW FORM -->
+    <div class="review-section">
+      <div style="font-family:var(--font-display);font-size:1.1rem;letter-spacing:.05em;margin-bottom:14px">This Week's Review</div>
+
+      <div class="review-field-label">Week #</div>
+      <input class="field" type="number" id="rv-week" min="1" placeholder="e.g. 1" style="width:100px"/>
+
+      <div class="review-field-label">What I completed this week</div>
+      <textarea class="review-textarea" id="rv-done" rows="3" placeholder="Courses finished, milestones hit, savings made, IELTS sessions done…"></textarea>
+
+      <div class="review-field-label">What I missed or didn't do</div>
+      <textarea class="review-textarea" id="rv-missed" rows="3" placeholder="Blocks skipped, habits missed, lower-than-planned pace…"></textarea>
+
+      <div class="review-field-label">Plan for next week</div>
+      <textarea class="review-textarea" id="rv-plan" rows="3" placeholder="Specific courses to finish, daily schedule decisions, income goals…"></textarea>
+
+      <div class="review-field-label">Savings this week (BDT earned/saved)</div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <input class="field" type="number" id="rv-savings" placeholder="e.g. 20000"/>
+        <button class="btn btn-ghost" onclick="applySavings()">Apply to Tracker</button>
+      </div>
+
+      <div class="review-field-label">Notes / observations</div>
+      <textarea class="review-textarea" id="rv-notes" rows="2" placeholder="Energy levels, blockers, insights, anything else…"></textarea>
+
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button class="btn btn-primary" onclick="saveReview()">Save Review</button>
+        <button class="btn btn-ghost"   onclick="clearForm()">Clear</button>
+      </div>
+      <div class="sync-status" id="sync-status" style="margin-top:8px"></div>
+    </div>
+
+    <!-- QUICK STATS FOR CONTEXT -->
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="sec-head" style="margin-top:0"><div class="sec-title">Context</div><div class="sec-line"></div></div>
+      <div class="card"><div class="card-label">Plan Month</div><div class="card-value amber" id="ctx-month">—</div><div class="card-sub">of 18</div></div>
+      <div class="card"><div class="card-label">Savings</div><div class="card-value green" id="ctx-savings">—%</div><div class="card-sub" id="ctx-savings-sub">— EUR of 10,000</div></div>
+      <div class="card"><div class="card-label">Courses Done</div><div class="card-value blue" id="ctx-courses">—</div><div class="card-sub" id="ctx-courses-sub">of — total</div></div>
+      <div class="card"><div class="card-label">Milestones</div><div class="card-value purple" id="ctx-miles">—</div><div class="card-sub" id="ctx-miles-sub">of — done</div></div>
+      <div class="card"><div class="card-label">Current Tier</div><div class="card-value" id="ctx-tier" style="color:var(--orange)">—</div><div class="card-sub" id="ctx-tier-range">—</div></div>
+      <div class="card"><div class="card-label">IELTS Phase</div><div class="card-value" id="ctx-phase" style="color:var(--amber)">—</div><div class="card-sub" id="ctx-phase-sub">—</div></div>
+    </div>
+  </div>
+
+  <!-- REVIEW LOG -->
+  <div class="sec-head"><div class="sec-title">Review Log</div><div class="sec-line"></div><div class="sec-tag dim" id="review-count-tag">0 reviews</div></div>
+  <div id="review-log"></div>
+
+  <!-- SEPARATOR -->
+  <div style="margin:32px 0;border-top:1px solid var(--border2)"></div>
+
+  <!-- MATH TRACKER -->
+  <div class="sec-head">
+    <div class="sec-title">Math &amp; Physics Progress</div>
+    <div class="sec-line"></div>
+    <div class="sec-tag green" id="math-overall-tag">0%</div>
+  </div>
+  <div class="alert ok" style="margin-bottom:16px">
+    <span class="alert-icon">📐</span>
+    Chapter-level tracker for the 9 self-study topics. Runs in parallel with courses every day. Target completion: July 2027.
+  </div>
+  <div id="math-wrap"></div>
+
+  <p class="footnote">
+    Reviews are stored locally and synced to Google Drive when signed in.<br>
+    Math progress is tracked at chapter level — tick each chapter as you complete it.<br>
+    This page is designed for Sunday use: reflect, log, then plan the coming week.
+  </p>
+</main>
+<div id="footer-ph"></div>
+<script src="data.js"></script><script src="update.js"></script>
+<script async defer src="https://apis.google.com/js/api.js"></script>
+<script>
+const mathOpen = {};
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('nav-ph').innerHTML    = buildNavHTML('review.html');
+  document.getElementById('footer-ph').innerHTML = buildFooterHTML();
+  // Pre-fill week number
+  const reviews = getWeeklyReviews();
+  document.getElementById('rv-week').value = reviews.length + 1;
+  refreshUI();
+});
+['ui:refresh','state:loaded','math:updated'].forEach(e => document.addEventListener(e, refreshUI));
+
+function saveReview() {
+  const wk     = parseInt(document.getElementById('rv-week').value) || 1;
+  const done   = document.getElementById('rv-done').value.trim();
+  const missed = document.getElementById('rv-missed').value.trim();
+  const plan   = document.getElementById('rv-plan').value.trim();
+  const savings= document.getElementById('rv-savings').value.trim();
+  const notes  = document.getElementById('rv-notes').value.trim();
+  if (!done && !plan) { alert('Fill in at least "completed" and "plan" fields.'); return; }
+  saveWeeklyReview({
+    week: wk,
+    date: new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}),
+    done, missed, plan, savings_bdt: savings || '—', notes,
+    plan_month: planMonth(),
+    savings_pct: S.pct().toFixed(1),
+  });
+  U.save();
+  clearForm();
+  document.getElementById('rv-week').value = getWeeklyReviews().length + 1;
+  renderReviewLog();
+  const ss = document.getElementById('sync-status');
+  ss.textContent = '✓ Review saved'; ss.className = 'sync-status sync-saved';
+  setTimeout(() => { ss.textContent = ''; }, 3000);
+}
+
+function applySavings() {
+  const v = parseFloat(document.getElementById('rv-savings').value);
+  if (isNaN(v) || v <= 0) { alert('Enter a valid BDT amount.'); return; }
+  U.updateSavings(v, S.monthly);
+  refreshUI();
+}
+
+function clearForm() {
+  ['rv-done','rv-missed','rv-plan','rv-notes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('rv-savings').value = '';
+}
+
+function renderReviewLog() {
+  const reviews = getWeeklyReviews();
+  const tag = document.getElementById('review-count-tag');
+  tag.textContent = reviews.length + ' review' + (reviews.length!==1?'s':'');
+  const wrap = document.getElementById('review-log');
+  if (!reviews.length) {
+    wrap.innerHTML = '<div style="font-size:11px;color:var(--text3);padding:12px 0">No reviews yet. Complete your first one above.</div>';
+    return;
+  }
+  wrap.innerHTML = reviews.map((rv,i) => `
+    <div class="r-log-item">
+      <span class="r-log-del" onclick="delReview(${i})">✕</span>
+      <div class="r-log-week">Week ${rv.week}</div>
+      <div class="r-log-date">${rv.date} · Month ${rv.plan_month||'—'}/18 · Savings ${rv.savings_pct||'—'}%</div>
+      ${rv.done?`<div class="r-log-section">Completed</div><div class="r-log-content">${rv.done}</div>`:''}
+      ${rv.missed?`<div class="r-log-section">Missed</div><div class="r-log-content">${rv.missed}</div>`:''}
+      ${rv.plan?`<div class="r-log-section">Next Week Plan</div><div class="r-log-content">${rv.plan}</div>`:''}
+      ${rv.savings_bdt&&rv.savings_bdt!=='—'?`<div class="r-log-section">Savings Logged</div><div class="r-log-content">${parseInt(rv.savings_bdt).toLocaleString()} BDT</div>`:''}
+      ${rv.notes?`<div class="r-log-section">Notes</div><div class="r-log-content">${rv.notes}</div>`:''}
+    </div>
+  `).join('');
+}
+
+function delReview(i) {
+  if (!confirm('Delete this review entry?')) return;
+  const reviews = getWeeklyReviews(); reviews.splice(i,1);
+  localStorage.setItem('weekly_reviews', JSON.stringify(reviews));
+  U.save(); renderReviewLog();
+}
+
+function renderMath() {
+  const mDone   = getMathDone();
+  const totalCh = MATH_TOPICS.reduce((a,t) => a + t.chapters.length, 0);
+  const doneCh  = Object.keys(mDone).filter(k => mDone[k]).length;
+  const pct     = totalCh > 0 ? Math.round(doneCh/totalCh*100) : 0;
+  document.getElementById('math-overall-tag').textContent = pct + '% · ' + doneCh + '/' + totalCh + ' chapters';
+
+  document.getElementById('math-wrap').innerHTML = MATH_TOPICS.map((topic,ti) => {
+    const topicDone  = topic.chapters.filter((_,ci) => mDone[ti+'_'+ci]).length;
+    const topicTotal = topic.chapters.length;
+    const topicPct   = Math.round(topicDone/topicTotal*100);
+    const isOpen     = !!mathOpen[ti];
+
+    return `<div class="math-subject">
+      <div class="math-subject-head" onclick="toggleMathSubject(${ti})">
+        <div class="ms-name">${topic.subject}</div>
+        <div class="ms-ref" style="color:var(--text3)">${topic.ref}</div>
+        <div class="ms-months">${topic.months}</div>
+        <div class="ms-pct">${topicPct}%</div>
+        <div class="ms-chev${isOpen?' open':''}">▼</div>
+      </div>
+      <div class="ms-progress"><div class="ms-prog-fill" style="width:${topicPct}%"></div></div>
+      <div class="math-chapters${isOpen?' open':''}">
+        ${topic.chapters.map((ch,ci) => {
+          const isDone = !!mDone[ti+'_'+ci];
+          return `<div class="math-chapter ${isDone?'done':''}" onclick="toggleMathCh(${ti},${ci})">
+            <div class="mc-box">${isDone?'✓':''}</div>
+            <div class="mc-name">${ch}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleMathSubject(ti) {
+  mathOpen[ti] = !mathOpen[ti]; renderMath();
+}
+function toggleMathCh(ti, ci) {
+  U.toggleMathChapter(ti, ci);
+}
+
+function refreshUI() {
+  const t   = getTier();
+  const pre = U.Phase.isPreIelts();
+  const sum = U.liveSummary();
+
+  document.getElementById('ph-month').textContent      = sum.planMonth;
+  document.getElementById('ctx-month').textContent     = sum.planMonth;
+  document.getElementById('ctx-savings').textContent   = sum.savingsPct.toFixed(1) + '%';
+  document.getElementById('ctx-savings-sub').textContent= Math.round(sum.savingsEur) + ' EUR of 10,000';
+  document.getElementById('ctx-courses').textContent   = sum.cDone;
+  document.getElementById('ctx-courses-sub').textContent='of ' + sum.cTotal + ' total';
+  document.getElementById('ctx-miles').textContent     = sum.mDone;
+  document.getElementById('ctx-miles-sub').textContent = 'of ' + sum.mTotal + ' milestones';
+  document.getElementById('ctx-tier').textContent      = 'Tier ' + t.id + ' ' + t.icon;
+  document.getElementById('ctx-tier').style.color      = t.col;
+  document.getElementById('ctx-tier-range').textContent= t.range;
+  document.getElementById('ctx-phase').textContent     = pre ? 'Pre-IELTS' : 'Post-IELTS';
+  document.getElementById('ctx-phase-sub').textContent = pre ? 'IELTS owns morning block' : 'Math/Physics owns morning block';
+  document.getElementById('ctx-phase').style.color     = pre ? 'var(--amber)' : 'var(--green)';
+
+  renderReviewLog();
+  renderMath();
+}
+</script>
+</body>
+</html>

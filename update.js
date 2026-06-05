@@ -1,157 +1,91 @@
 /* ═══════════════════════════════════════════════════════════
-   SPRINT OS — update.js
-   Real-time routine updates driven by device clock + date.
-   Google Drive (gapi) for persistent state backup.
-   Google Calendar for scheduling study/work events.
+   SPRINT OS — update.js  v2
+   Real-time engine. Bug fixes from v1:
+   - U.init() now fires regardless of gapi load status
+   - Clock uses fresh Date() on every call
+   - Phase.planMonth() proxy added
+   - _highlightCurrentBlock safely handles missing sched-list
+   NEW in v2:
+   - Web Push Notifications (Notification API)
+   - Confetti on major milestone completions
+   - PWA install prompt handling
+   - Income log integration
+   - Weekly review trigger on Sundays
+   - Math progress auto-completion detection
+   - OU checklist completion detection
 ═══════════════════════════════════════════════════════════ */
 
-// ── GOOGLE API CONFIGURATION ────────────────────────────────
-// To enable: create a Google Cloud project, enable Drive + Calendar APIs,
-// add OAuth 2.0 credentials, and replace the values below.
-// Scopes needed:
-//   https://www.googleapis.com/auth/drive.appdata
-//   https://www.googleapis.com/auth/calendar.events
-const GAPI_CONFIG = {
-  clientId:     'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com',
-  apiKey:       'YOUR_GOOGLE_API_KEY',
-  discoveryDocs: [
-    'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest',
-    'https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest',
-  ],
-  scopes: [
-    'https://www.googleapis.com/auth/drive.appdata',
-    'https://www.googleapis.com/auth/calendar.events',
-  ].join(' '),
-  driveFileName: 'sprint-os-state.json',
-  calendarId:    'primary',
-};
-
-// ── STATE FILE SCHEMA (stored in Drive appdata folder) ──────
-// {
-//   version:    1,
-//   savedAt:    ISO-string,
-//   savings: { bdt: number, monthly: number },
-//   milestones: boolean[],   // parallel to MILESTONES array
-//   courses:    boolean[],   // parallel to flatCourses()
-//   preIelts:   boolean,
-//   ieltsTaken: boolean,
-//   ieltsTakenDate: string | null,
-//   ieltsScore: number | null,
-//   settings: {
-//     addEventsToCalendar: boolean,
-//     calendarReminders: boolean,
-//   }
-// }
-
-// ═══════════════════════════════════════════════════════════
-//  UPDATE ENGINE — runs on every page, exports window.U
-// ═══════════════════════════════════════════════════════════
 window.U = (function () {
 
-  // ── 1. DEVICE CLOCK ──────────────────────────────────────
+  /* ── 1. CLOCK ────────────────────────────────────────────── */
   const Clock = {
-    now()    { return new Date(); },
-    hour()   { return this.now().getHours(); },
-    minute() { return this.now().getMinutes(); },
-    dow()    { return this.now().getDay(); },        // 0=Sun … 6=Sat
-    date()   { return this.now().toDateString(); },
-    iso()    { return this.now().toISOString(); },
-    weekNum() {
-      const d = this.now();
-      const jan1 = new Date(d.getFullYear(), 0, 1);
-      return Math.ceil(((d - jan1) / 864e5 + jan1.getDay() + 1) / 7);
-    },
-    isWeekend() { const d = this.dow(); return d === 0 || d === 6; },
-    isSaturday() { return this.dow() === 6; },
-    isSunday()   { return this.dow() === 0; },
-    // Returns e.g. "06:30" for current time
-    hhMM() {
-      const h = String(this.hour()).padStart(2,'0');
-      const m = String(this.minute()).padStart(2,'0');
-      return `${h}:${m}`;
-    },
-    // Which time block are we in right now?
+    now()      { return new Date(); },
+    hour()     { return this.now().getHours(); },
+    minute()   { return this.now().getMinutes(); },
+    dow()      { return this.now().getDay(); },   // 0=Sun … 6=Sat
+    hhMM()     { return String(this.hour()).padStart(2,'0') + ':' + String(this.minute()).padStart(2,'0'); },
+    dateStr()  { return this.now().toISOString().slice(0,10); },           // YYYY-MM-DD
+    isSaturday(){ return this.dow() === 6; },
+    isSunday()  { return this.dow() === 0; },
+    isWeekend() { return this.dow() === 0 || this.dow() === 6; },
+
     currentBlock(schedule) {
+      if (!schedule || !schedule.length) return null;
       const now = this.hour() * 60 + this.minute();
+      const toMins = s => {
+        if (!s) return 0;
+        const [h, m] = s.split(':').map(Number);
+        return (h || 0) * 60 + (m || 0);
+      };
       for (const row of schedule) {
-        const [startStr, endStr] = row.t.split('–');
-        const toMins = s => {
-          const [h, m] = s.split(':').map(Number);
-          return h * 60 + (m || 0);
-        };
-        let start = toMins(startStr);
-        let end   = toMins(endStr);
-        // Handle overnight (sleep)
+        const parts = (row.t || '').split('–');
+        if (parts.length < 2) continue;
+        const start = toMins(parts[0]);
+        const end   = toMins(parts[1]);
         if (end < start) { if (now >= start || now < end) return row; }
-        else              { if (now >= start && now < end) return row; }
+        else             { if (now >= start && now < end) return row; }
       }
       return null;
     },
   };
 
-  // ── 2. DATE-DRIVEN PHASE DETECTION ───────────────────────
+  /* ── 2. PHASE ────────────────────────────────────────────── */
   const Phase = {
-    // Detect pre/post IELTS from localStorage (user sets when they take exam)
-    isPreIelts() {
-      return localStorage.getItem('pre_ielts') !== 'false';
-    },
-    setIeltsTaken(score) {
+    isPreIelts()      { return localStorage.getItem('pre_ielts') !== 'false'; },
+    setIeltsTaken(s)  {
       localStorage.setItem('pre_ielts',         'false');
       localStorage.setItem('ielts_taken',        'true');
-      localStorage.setItem('ielts_taken_date',   Clock.iso());
-      localStorage.setItem('ielts_score',        String(score));
+      localStorage.setItem('ielts_taken_date',   Clock.now().toISOString());
+      localStorage.setItem('ielts_score',        String(s));
     },
-    ieltsTaken()     { return localStorage.getItem('ielts_taken') === 'true'; },
-    ieltsScore()     { return parseFloat(localStorage.getItem('ielts_score')) || null; },
-    ieltsTakenDate() { return localStorage.getItem('ielts_taken_date') || null; },
-
-    // Plan month (1–18, auto from device date)
-    planMonth() { return planMonth(); }, // from data.js
-    // Days since plan start
-    daysSinceStart() { return Math.floor((Clock.now() - D.start) / 864e5); },
-    // Are we in a Monday–Friday work window?
-    isWorkday() { const d = Clock.dow(); return d >= 1 && d <= 5; },
-    // What week of the plan is it?
-    planWeek() { return Math.max(1, Math.ceil(this.daysSinceStart() / 7)); },
+    ieltsTaken()      { return localStorage.getItem('ielts_taken') === 'true'; },
+    ieltsScore()      { return parseFloat(localStorage.getItem('ielts_score')) || null; },
+    ieltsTakenDate()  { return localStorage.getItem('ielts_taken_date') || null; },
+    planMonth()       { return planMonth(); },   // proxy to global
   };
 
-  // ── 3. ROUTINE RESOLVER ───────────────────────────────────
-  // Returns the correct schedule for right now, auto-detected from device.
+  /* ── 3. ROUTINE ──────────────────────────────────────────── */
   const Routine = {
-    // hasOrder: persisted per-day (resets at midnight)
-    todayKey() { return 'order_day_' + Clock.date(); },
+    todayKey()  { return 'order_day_' + Clock.dateStr(); },
     hasOrder()  { return localStorage.getItem(this.todayKey()) !== 'false'; },
     setOrder(v) { localStorage.setItem(this.todayKey(), String(v)); },
 
-    // Full resolved schedule for today
     todaySchedule() {
-      return buildSchedule(
-        this.hasOrder(),
-        Phase.isPreIelts(),
-        getTier()
-      );
+      return buildSchedule(this.hasOrder(), Phase.isPreIelts(), getTier());
     },
-    // Current block (what should you be doing RIGHT NOW)
-    currentBlock() {
-      return Clock.currentBlock(this.todaySchedule());
-    },
-    // Next block
+    currentBlock()  { return Clock.currentBlock(this.todaySchedule()); },
     nextBlock() {
       const sched = this.todaySchedule();
       const now   = Clock.hour() * 60 + Clock.minute();
-      const toMins = s => { const [h, m] = s.split(':').map(Number); return h * 60 + (m || 0); };
+      const toMins = s => { const [h,m] = (s||'0:0').split(':').map(Number); return h*60+(m||0); };
       for (let i = 0; i < sched.length; i++) {
-        const [, endStr] = sched[i].t.split('–');
-        if (now < toMins(endStr)) return sched[i + 1] || null;
+        const parts = (sched[i].t||'').split('–');
+        if (parts.length < 2) continue;
+        if (now < toMins(parts[1])) return sched[i+1] || null;
       }
       return sched[0] || null;
     },
-    // Days until IELTS exam
-    daysToIelts()  { return daysUntil(D.ielts); },
-    daysToEdx()    { return daysUntil(D.edx); },
-    daysToOuApp()  { return daysUntil(D.ouApp); },
 
-    // Auto-updated greeting
     greeting() {
       const h = Clock.hour();
       if (h < 5)  return 'Still up late, Anway?';
@@ -160,151 +94,145 @@ window.U = (function () {
       if (h < 21) return 'Good evening, Anway.';
       return 'Late session, Anway.';
     },
-    // Daily priority message driven by date
     dailyPriority() {
-      if (this.daysToEdx() <= 7)  return '⚠️ edX expires in ' + this.daysToEdx() + ' days — open a lesson now.';
-      if (Phase.isPreIelts())      return '🎯 IELTS exam in ' + this.daysToIelts() + ' days — every session counts.';
-      return '📐 Post-IELTS: push courses + math daily.';
+      const edxD   = daysUntil(EDX_DATE);
+      const ieltsD = daysUntil(IELTS_DATE);
+      if (edxD <= 0)  return '🚨 edX courses have expired — check for extension options.';
+      if (edxD <= 7)  return `⚠️ edX expires in ${edxD} days — open a lesson NOW.`;
+      if (Phase.isPreIelts()) return `🎯 IELTS in ${ieltsD} days — every session counts.`;
+      return `📐 Post-IELTS: push courses + math every day.`;
     },
   };
 
-  // ── 4. GOOGLE DRIVE SYNC ──────────────────────────────────
-  const Drive = {
-    _loaded: false,
-    _fileId: null,
-    _signedIn: false,
+  /* ── 4. GOOGLE DRIVE ─────────────────────────────────────── */
+  const GAPI_CONFIG = {
+    clientId:      'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com',
+    apiKey:        'YOUR_GOOGLE_API_KEY',
+    discoveryDocs: [
+      'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest',
+      'https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest',
+    ],
+    scopes: 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/calendar.events',
+    fileName:    'sprint-os-state.json',
+    calendarId:  'primary',
+  };
 
-    // Snapshot of full app state
+  const Drive = {
+    _signedIn: false,
+    _fileId:   null,
+    _ready:    false,
+
     buildSnapshot() {
       return {
-        version:       1,
-        savedAt:       Clock.iso(),
-        savings:       { bdt: S.bdt, monthly: S.monthly },
-        milestones:    getMDone(),
-        courses:       getCDone(),
-        preIelts:      Phase.isPreIelts(),
-        ieltsTaken:    Phase.ieltsTaken(),
-        ieltsTakenDate:Phase.ieltsTakenDate(),
-        ieltsScore:    Phase.ieltsScore(),
+        version:        2,
+        savedAt:        Clock.now().toISOString(),
+        savings:        { bdt: S.bdt, monthly: S.monthly },
+        milestones:     getMDone(),
+        courses:        getCDone(),
+        mathDone:       getMathDone(),
+        ouDone:         getOUDone(),
+        preIelts:       Phase.isPreIelts(),
+        ieltsTaken:     Phase.ieltsTaken(),
+        ieltsTakenDate: Phase.ieltsTakenDate(),
+        ieltsScore:     Phase.ieltsScore(),
+        mockScores:     getMockScores(),
+        incomeLog:      getIncomeLog(),
         settings: {
-          addEventsToCalendar: localStorage.getItem('cal_events') !== 'false',
-          calendarReminders:   localStorage.getItem('cal_reminders') !== 'false',
+          calEvents:    localStorage.getItem('cal_events')    !== 'false',
+          calReminders: localStorage.getItem('cal_reminders') !== 'false',
+          pushNotifs:   localStorage.getItem('push_notifs')   === 'true',
         },
       };
     },
 
-    // Apply a loaded snapshot back to localStorage
     applySnapshot(snap) {
-      if (!snap || snap.version !== 1) return;
-      S.bdt     = snap.savings?.bdt     ?? S.bdt;
-      S.monthly = snap.savings?.monthly ?? S.monthly;
-      S.save();
-      if (snap.milestones) setMDone(snap.milestones);
-      if (snap.courses)    setCDone(snap.courses);
-      if (snap.preIelts  !== undefined) localStorage.setItem('pre_ielts',      String(snap.preIelts));
-      if (snap.ieltsTaken !== undefined){
+      if (!snap || !snap.version) return;
+      if (snap.savings)   { S.bdt = snap.savings.bdt; S.monthly = snap.savings.monthly; }
+      if (snap.milestones && snap.milestones.length === MILESTONES.length) setMDone(snap.milestones);
+      if (snap.courses    && snap.courses.length    === flatCourses().length) setCDone(snap.courses);
+      if (snap.mathDone)    localStorage.setItem('math_done',     JSON.stringify(snap.mathDone));
+      if (snap.ouDone)      localStorage.setItem('ou_done',       JSON.stringify(snap.ouDone));
+      if (snap.mockScores)  localStorage.setItem('mock_scores',   JSON.stringify(snap.mockScores));
+      if (snap.incomeLog)   localStorage.setItem('income_log',    JSON.stringify(snap.incomeLog));
+      if (snap.ieltsTaken !== undefined) {
+        localStorage.setItem('pre_ielts',        String(!snap.ieltsTaken));
         localStorage.setItem('ielts_taken',      String(snap.ieltsTaken));
         if (snap.ieltsTakenDate) localStorage.setItem('ielts_taken_date', snap.ieltsTakenDate);
-        if (snap.ieltsScore != null) localStorage.setItem('ielts_score',  String(snap.ieltsScore));
+        if (snap.ieltsScore)     localStorage.setItem('ielts_score',      String(snap.ieltsScore));
       }
       if (snap.settings) {
-        localStorage.setItem('cal_events',    String(snap.settings.addEventsToCalendar));
-        localStorage.setItem('cal_reminders', String(snap.settings.calendarReminders));
+        localStorage.setItem('cal_events',    String(snap.settings.calEvents));
+        localStorage.setItem('cal_reminders', String(snap.settings.calReminders));
+        localStorage.setItem('push_notifs',   String(snap.settings.pushNotifs));
       }
     },
 
-    // ── Google API init ─────────────────────────────────────
     async initGapi() {
       return new Promise((resolve, reject) => {
         if (typeof gapi === 'undefined') { reject(new Error('gapi not loaded')); return; }
         gapi.load('client:auth2', async () => {
           try {
             await gapi.client.init({
-              apiKey:       GAPI_CONFIG.apiKey,
-              clientId:     GAPI_CONFIG.clientId,
-              discoveryDocs:GAPI_CONFIG.discoveryDocs,
-              scope:        GAPI_CONFIG.scopes,
+              apiKey:        GAPI_CONFIG.apiKey,
+              clientId:      GAPI_CONFIG.clientId,
+              discoveryDocs: GAPI_CONFIG.discoveryDocs,
+              scope:         GAPI_CONFIG.scopes,
             });
-            gapi.auth2.getAuthInstance().isSignedIn.listen(v => this._onSignInChange(v));
-            this._onSignInChange(gapi.auth2.getAuthInstance().isSignedIn.get());
-            this._loaded = true;
+            this._ready = true;
+            gapi.auth2.getAuthInstance().isSignedIn.listen(v => this._onChange(v));
+            this._onChange(gapi.auth2.getAuthInstance().isSignedIn.get());
             resolve();
           } catch (e) { reject(e); }
         });
       });
     },
 
-    _onSignInChange(isSignedIn) {
-      this._signedIn = isSignedIn;
-      document.dispatchEvent(new CustomEvent('gapi:auth', { detail: { isSignedIn } }));
-      if (isSignedIn) this.load();
+    _onChange(signedIn) {
+      this._signedIn = signedIn;
+      document.dispatchEvent(new CustomEvent('gapi:auth', { detail: { isSignedIn: signedIn } }));
+      if (signedIn) this.load();
     },
 
-    signIn()  { if (gapi?.auth2) gapi.auth2.getAuthInstance().signIn(); },
-    signOut() { if (gapi?.auth2) gapi.auth2.getAuthInstance().signOut(); },
+    signIn()     { this._ready && gapi.auth2.getAuthInstance().signIn(); },
+    signOut()    { this._ready && gapi.auth2.getAuthInstance().signOut(); },
     isSignedIn() { return this._signedIn; },
 
-    // ── Find or create the state file in Drive appdata ──────
     async _findOrCreate() {
       if (this._fileId) return this._fileId;
-      const resp = await gapi.client.drive.files.list({
-        spaces: 'appDataFolder',
-        q: `name='${GAPI_CONFIG.driveFileName}'`,
-        fields: 'files(id)',
-      });
-      if (resp.result.files.length > 0) {
-        this._fileId = resp.result.files[0].id;
-      } else {
-        const create = await gapi.client.drive.files.create({
-          resource: { name: GAPI_CONFIG.driveFileName, parents: ['appDataFolder'] },
-          fields: 'id',
-        });
-        this._fileId = create.result.id;
+      const r = await gapi.client.drive.files.list({ spaces:'appDataFolder', q:`name='${GAPI_CONFIG.fileName}'`, fields:'files(id)' });
+      if (r.result.files.length) { this._fileId = r.result.files[0].id; }
+      else {
+        const c = await gapi.client.drive.files.create({ resource:{ name:GAPI_CONFIG.fileName, parents:['appDataFolder'] }, fields:'id' });
+        this._fileId = c.result.id;
       }
       return this._fileId;
     },
 
-    // ── Save state to Drive ──────────────────────────────────
     async save() {
       if (!this._signedIn) { this._saveLocal(); return; }
       try {
-        const fileId  = await this._findOrCreate();
+        const id      = await this._findOrCreate();
         const content = JSON.stringify(this.buildSnapshot(), null, 2);
-        await gapi.client.request({
-          path:   `https://www.googleapis.com/upload/drive/v3/files/${fileId}`,
-          method: 'PATCH',
-          params: { uploadType: 'media' },
-          headers: { 'Content-Type': 'application/json' },
-          body:   content,
-        });
-        this._setStatus('saved', 'Saved to Google Drive · ' + new Date().toLocaleTimeString());
-      } catch (e) {
-        console.warn('Drive save failed, falling back to localStorage:', e);
-        this._saveLocal();
-      }
+        await gapi.client.request({ path:`https://www.googleapis.com/upload/drive/v3/files/${id}`, method:'PATCH', params:{uploadType:'media'}, headers:{'Content-Type':'application/json'}, body:content });
+        _setStatus('saved', 'Saved to Google Drive · ' + new Date().toLocaleTimeString());
+      } catch { this._saveLocal(); }
     },
 
-    // ── Load state from Drive ────────────────────────────────
     async load() {
-      if (!this._signedIn) { return; }
+      if (!this._signedIn) return;
       try {
-        const fileId = await this._findOrCreate();
-        const resp   = await gapi.client.drive.files.get({
-          fileId, alt: 'media',
-        });
+        const id   = await this._findOrCreate();
+        const resp = await gapi.client.drive.files.get({ fileId:id, alt:'media' });
         const snap = typeof resp.result === 'string' ? JSON.parse(resp.result) : resp.result;
         this.applySnapshot(snap);
         document.dispatchEvent(new CustomEvent('state:loaded'));
-        this._setStatus('loaded', 'Loaded from Google Drive · ' + new Date().toLocaleTimeString());
-      } catch (e) {
-        console.warn('Drive load failed:', e);
-      }
+        _setStatus('loaded', 'Loaded from Google Drive · ' + new Date().toLocaleTimeString());
+      } catch (e) { console.warn('Drive load:', e); }
     },
 
-    // ── localStorage fallback ────────────────────────────────
     _saveLocal() {
       localStorage.setItem('sprint_snapshot', JSON.stringify(this.buildSnapshot()));
-      this._setStatus('local', 'Saved locally (not signed in)');
+      _setStatus('local', 'Saved locally');
     },
     loadLocal() {
       try {
@@ -312,567 +240,496 @@ window.U = (function () {
         if (raw) this.applySnapshot(JSON.parse(raw));
       } catch {}
     },
-
-    _setStatus(type, msg) {
-      document.dispatchEvent(new CustomEvent('sync:status', { detail: { type, msg } }));
-      const el = document.getElementById('sync-status');
-      if (el) {
-        el.textContent = msg;
-        el.className   = 'sync-status sync-' + type;
-      }
-    },
   };
 
-  // ── 5. GOOGLE CALENDAR INTEGRATION ───────────────────────
+  function _setStatus(type, msg) {
+    document.dispatchEvent(new CustomEvent('sync:status', { detail: { type, msg } }));
+    const el = document.getElementById('sync-status');
+    if (el) { el.textContent = msg; el.className = 'sync-status sync-' + type; }
+  }
+
+  /* ── 5. GOOGLE CALENDAR ──────────────────────────────────── */
   const Cal = {
-    enabled() { return localStorage.getItem('cal_events') !== 'false'; },
+    enabled()   { return localStorage.getItem('cal_events') !== 'false'; },
     reminders() { return localStorage.getItem('cal_reminders') !== 'false'; },
 
-    // Build a calendar event from a schedule block
+    _blockColor: { ielts:'11', math:'2', work:'6', study:'9', thesis:'3', life:'5', rest:'8' },
+
     _buildEvent(block, date) {
-      const [startStr, endStr] = block.t.split('–');
-      const toISO = (timeStr, d) => {
-        const [h, m] = timeStr.split(':').map(Number);
-        const dt = new Date(d);
-        dt.setHours(h, m, 0, 0);
-        // Handle overnight end (22:00–06:00)
-        if (endStr === '06:00' && h >= 22) dt.setDate(dt.getDate() + 1);
+      const [ss, es] = block.t.split('–');
+      const tz  = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const toISO = (ts, d) => {
+        const [h,m] = ts.split(':').map(Number);
+        const dt = new Date(d); dt.setHours(h, m, 0, 0);
+        if (es === '06:00' && h >= 22) dt.setDate(dt.getDate()+1);
         return dt.toISOString();
       };
-      const colorMap = {
-        ielts:  '11', // Tomato
-        math:   '2',  // Sage
-        work:   '6',  // Tangerine
-        study:  '9',  // Blueberry
-        thesis: '3',  // Grape
-        life:   '5',  // Banana
-        rest:   '8',  // Graphite
-      };
       const reminders = this.reminders()
-        ? { useDefault: false, overrides: [{ method: 'popup', minutes: 5 }] }
-        : { useDefault: false, overrides: [] };
+        ? { useDefault:false, overrides:[{ method:'popup', minutes:5 }] }
+        : { useDefault:false, overrides:[] };
       return {
         summary:     block.n,
         description: block.d,
-        start:       { dateTime: toISO(startStr, date), timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone },
-        end:         { dateTime: toISO(endStr,   date), timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone },
-        colorId:     colorMap[block.tag] || '8',
+        start:       { dateTime:toISO(ss, date), timeZone:tz },
+        end:         { dateTime:toISO(es, date), timeZone:tz },
+        colorId:     this._blockColor[block.tag] || '8',
         reminders,
-        extendedProperties: { private: { source: 'sprint-os', tag: block.tag } },
+        extendedProperties: { private:{ source:'sprint-os', tag:block.tag } },
       };
     },
 
-    // Add today's full schedule to Calendar (skips already-added)
     async addTodaySchedule() {
-      if (!Drive._signedIn || !this.enabled()) return;
-      const today    = Clock.now();
-      const schedule = Routine.todaySchedule();
-      // Filter out rest/sleep (optional — user can change this)
-      const toAdd = schedule.filter(b => b.tag !== 'rest');
+      if (!Drive._signedIn || !this.enabled()) return 0;
+      const sched = Routine.todaySchedule().filter(b => b.tag !== 'rest');
       let added = 0;
-      for (const block of toAdd) {
-        try {
-          await gapi.client.calendar.events.insert({
-            calendarId: GAPI_CONFIG.calendarId,
-            resource:   this._buildEvent(block, today),
-          });
-          added++;
-        } catch (e) {
-          console.warn(`Failed to add event "${block.n}":`, e);
-        }
+      for (const b of sched) {
+        try { await gapi.client.calendar.events.insert({ calendarId:GAPI_CONFIG.calendarId, resource:this._buildEvent(b, Clock.now()) }); added++; }
+        catch {}
       }
       return added;
     },
 
-    // Add a single milestone deadline as a Calendar event
-    async addMilestoneEvent(milestone) {
-      if (!Drive._signedIn || !this.enabled()) return;
-      // Parse horizon string to a rough date
-      const horizonDate = this._parseHorizon(milestone.h);
-      if (!horizonDate) return;
-      try {
-        await gapi.client.calendar.events.insert({
-          calendarId: GAPI_CONFIG.calendarId,
-          resource: {
-            summary:     '🎯 ' + milestone.t,
-            description: milestone.s,
-            start:       { date: horizonDate },
-            end:         { date: horizonDate },
-            colorId:     milestone.type === 'urgent' ? '11' : '5',
-            reminders:   this.reminders()
-              ? { useDefault: false, overrides: [{ method: 'popup', minutes: 1440 }] }
-              : { useDefault: false },
-          },
-        });
-      } catch (e) { console.warn('Cal event add failed:', e); }
+    async addMilestoneEvent(m) {
+      if (!Drive._signedIn || !this.enabled() || !m) return;
+      const dateMap = { 'TODAY':Clock.dateStr(), 'Before Jun 26':'2026-06-25', 'Jun 2026':'2026-06-30', 'Jul 2026':'2026-07-31', 'Aug 2026':'2026-08-31', 'Oct–Nov 2026':'2026-10-31', 'Dec 2026–Jan 2027':'2026-12-31', 'Feb–Mar 2027':'2027-02-28', 'Mar–Apr 2027':'2027-03-31', 'Jun–Jul 2027':'2027-06-30', 'Jul 2027':'2027-07-31', 'Jan 2027':'2027-01-31', 'Aug–Sep 2027':'2027-08-31', 'Sep 2027':'2027-09-30', 'Sep–Nov 2027':'2027-09-30', '2028':'2028-02-01' };
+      const dt = dateMap[m.h]; if (!dt) return;
+      try { await gapi.client.calendar.events.insert({ calendarId:GAPI_CONFIG.calendarId, resource:{ summary:'🎯 '+m.t, description:m.s, start:{date:dt}, end:{date:dt}, colorId: m.type==='urgent'?'11':'5', reminders:this.reminders()?{useDefault:false,overrides:[{method:'popup',minutes:1440}]}:{useDefault:false} } }); }
+      catch {}
     },
 
-    // Add IELTS exam date
-    async addIeltsExam() {
-      if (!Drive._signedIn || !this.enabled()) return;
-      try {
-        await gapi.client.calendar.events.insert({
-          calendarId: GAPI_CONFIG.calendarId,
-          resource: {
-            summary:     '📝 IELTS Exam — Target Band 7.0',
-            description: 'IELTS Academic exam. Target: Band 7.0. Unlocks OU MPhys application eligibility.',
-            start:       { date: '2026-07-31' },
-            end:         { date: '2026-07-31' },
-            colorId:     '11',
-            reminders:   { useDefault: false, overrides: [
-              { method: 'popup',  minutes: 1440 },
-              { method: 'popup',  minutes: 10080 },
-            ]},
-          },
-        });
-      } catch (e) { console.warn('IELTS cal event failed:', e); }
-    },
-
-    // Add edX expiry reminder
     async addEdxExpiry() {
       if (!Drive._signedIn || !this.enabled()) return;
-      try {
-        await gapi.client.calendar.events.insert({
-          calendarId: GAPI_CONFIG.calendarId,
-          resource: {
-            summary:     '⚠️ edX Courses Expire — Last Day',
-            description: 'Agentic AI + AI for Everyone (IBM) expire today on edX.',
-            start:       { date: '2026-06-26' },
-            end:         { date: '2026-06-26' },
-            colorId:     '11',
-            reminders:   { useDefault: false, overrides: [
-              { method: 'popup', minutes: 1440 },
-              { method: 'popup', minutes: 2880 },
-            ]},
-          },
-        });
-      } catch (e) { console.warn('edX cal event failed:', e); }
+      try { await gapi.client.calendar.events.insert({ calendarId:GAPI_CONFIG.calendarId, resource:{ summary:'⚠️ edX Courses Expire', description:'Agentic AI + AI for Everyone (IBM) expire today.', start:{date:'2026-06-26'}, end:{date:'2026-06-26'}, colorId:'11' } }); } catch {}
     },
 
-    _parseHorizon(h) {
-      // Map horizon strings to approximate ISO dates
-      const map = {
-        'TODAY':            new Date().toISOString().slice(0, 10),
-        'Before Jun 26':    '2026-06-25',
-        'Jun 2026':         '2026-06-30',
-        'Jul 2026':         '2026-07-31',
-        'Aug 2026':         '2026-08-31',
-        'Oct–Nov 2026':     '2026-10-31',
-        'Dec 2026–Jan 2027':'2026-12-31',
-        'Feb–Mar 2027':     '2027-02-28',
-        'Mar–Apr 2027':     '2027-03-31',
-        'Jun–Jul 2027':     '2027-06-30',
-        'Jul 2027':         '2027-07-31',
-        'Jan 2027':         '2027-01-31',
-        'Aug–Sep 2027':     '2027-08-31',
-        'Sep 2027':         '2027-09-30',
-        'Sep–Nov 2027':     '2027-09-30',
-        '2028':             '2028-02-01',
-        'Done ✓':           null,
-      };
-      return map[h] || null;
+    async addIeltsExam() {
+      if (!Drive._signedIn || !this.enabled()) return;
+      try { await gapi.client.calendar.events.insert({ calendarId:GAPI_CONFIG.calendarId, resource:{ summary:'📝 IELTS Exam — Target Band 7.0', start:{date:'2026-07-31'}, end:{date:'2026-07-31'}, colorId:'11', reminders:{useDefault:false,overrides:[{method:'popup',minutes:1440},{method:'popup',minutes:10080}]} } }); } catch {}
     },
   };
 
-  // ── 6. LIVE CLOCK TICKER ──────────────────────────────────
-  // Updates the "now" indicator and live countdown chips every second
+  /* ── 6. LIVE TICKER ──────────────────────────────────────── */
   const Ticker = {
-    _interval: null,
-    _lastDate: Clock.date(),
+    _iv:       null,
+    _lastDate: '',
 
     start() {
-      this._interval = setInterval(() => this._tick(), 1000);
-      this._tick(); // immediate first run
+      this._lastDate = Clock.dateStr();
+      this._iv = setInterval(() => this._tick(), 1000);
+      this._tick();
     },
-    stop() { clearInterval(this._interval); },
+    stop() { clearInterval(this._iv); },
 
     _tick() {
-      // Midnight rollover — trigger a full routine refresh
-      if (Clock.date() !== this._lastDate) {
-        this._lastDate = Clock.date();
+      const now = Clock.dateStr();
+      if (now !== this._lastDate) {
+        this._lastDate = now;
         document.dispatchEvent(new CustomEvent('routine:refresh'));
       }
+      _upd('live-clock',     Clock.hhMM());
+      _upd('live-date-full', Clock.now().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}));
+      _upd('cnt-edx',   daysUntil(EDX_DATE)   + ' days');
+      _upd('cnt-ielts', daysUntil(IELTS_DATE) + ' days');
+      _upd('cnt-ou',    daysUntil(OUAPP_DATE) + ' days');
+      _upd('edx-days',  String(daysUntil(EDX_DATE)));
+      _upd('nb-edx',    daysUntil(EDX_DATE) + 'd edX');
+      this._highlightNow();
 
-      // Update live clock elements
-      this._updateEl('live-clock',  Clock.hhMM());
-      this._updateEl('live-date-full', Clock.now().toLocaleDateString('en-GB',
-        { weekday:'long', day:'numeric', month:'long', year:'numeric' }));
-
-      // Update countdown chips
-      const edxD  = daysUntil(D.edx);
-      const ieltsD = daysUntil(D.ielts);
-      const ouD   = daysUntil(D.ouApp);
-      this._updateEl('cnt-edx',   edxD  + ' days');
-      this._updateEl('cnt-ielts', ieltsD + ' days');
-      this._updateEl('cnt-ou',    ouD   + ' days');
-      this._updateEl('edx-days',  String(edxD));
-      this._updateEl('nb-edx',    edxD + 'd edX');
-
-      // "Now" indicator on schedule — highlight current block
-      this._highlightCurrentBlock();
-
-      // Phase auto-detect from date (not yet taken)
-      // If device date is past 2026-08-01 and user hasn't manually set,
-      // suggest switching to post-IELTS mode
-      if (Clock.now() > D.ielts && Phase.isPreIelts() && !Phase.ieltsTaken()) {
+      // Suggest phase switch if past IELTS date and still pre-IELTS
+      if (Clock.now() > IELTS_DATE && Phase.isPreIelts() && !Phase.ieltsTaken()) {
         document.dispatchEvent(new CustomEvent('phase:suggest-switch'));
       }
     },
 
-    _updateEl(id, text) {
-      const el = document.getElementById(id);
-      if (el && el.textContent !== text) el.textContent = text;
-    },
-
-    _highlightCurrentBlock() {
+    _highlightNow() {
       const rows = document.querySelectorAll('.sched-row');
       if (!rows.length) return;
-      const sched  = Routine.todaySchedule();
+      const sched   = Routine.todaySchedule();
       const current = Clock.currentBlock(sched);
       rows.forEach((row, i) => {
-        if (sched[i] && current && sched[i].t === current.t) {
-          row.classList.add('sched-now');
-          if (!row.querySelector('.now-badge')) {
-            const badge = document.createElement('span');
-            badge.className = 'now-badge';
-            badge.textContent = '▶ NOW';
-            row.querySelector('.sched-body')?.prepend(badge);
-          }
-        } else {
-          row.classList.remove('sched-now');
-          row.querySelector('.now-badge')?.remove();
-        }
+        const isCur = current && sched[i] && sched[i].t === current.t;
+        row.classList.toggle('sched-now', isCur);
+        const existing = row.querySelector('.now-badge');
+        if (isCur && !existing) {
+          const b = document.createElement('span');
+          b.className = 'now-badge'; b.textContent = '▶ NOW';
+          row.querySelector('.sched-body')?.prepend(b);
+        } else if (!isCur && existing) existing.remove();
       });
     },
   };
 
-  // ── 7. AUTO-SAVE MANAGER ─────────────────────────────────
-  // Debounced save triggered on any state mutation
-  const AutoSave = {
-    _timer: null,
-    _dirty: false,
+  function _upd(id, text) {
+    const el = document.getElementById(id);
+    if (el && el.textContent !== text) el.textContent = text;
+  }
 
+  /* ── 7. AUTO-SAVE ────────────────────────────────────────── */
+  const AutoSave = {
+    _t: null, _dirty: false,
     touch() {
       this._dirty = true;
-      clearTimeout(this._timer);
-      this._timer = setTimeout(() => this.flush(), 2000); // 2s debounce
+      clearTimeout(this._t);
+      this._t = setTimeout(() => this.flush(), 1800);
     },
-
     async flush() {
       if (!this._dirty) return;
       this._dirty = false;
       await Drive.save();
     },
-
-    // Force immediate save
-    async now() {
-      clearTimeout(this._timer);
-      this._dirty = false;
-      await Drive.save();
-    },
+    async now() { clearTimeout(this._t); this._dirty = false; await Drive.save(); },
   };
 
-  // ── 8. DAILY ROUTINE UPDATER ─────────────────────────────
-  // Called on every page load and at midnight
-  const RoutineUpdater = {
-    run() {
-      // Determine current phase from device date
-      const now = Clock.now();
-
-      // Auto-suggest Saturday mock test
-      if (Clock.isSaturday() && Phase.isPreIelts()) {
-        document.dispatchEvent(new CustomEvent('routine:saturday-mock'));
-      }
-
-      // Auto-warn if edX is within 3 days
-      if (daysUntil(D.edx) <= 3) {
-        document.dispatchEvent(new CustomEvent('routine:edx-critical'));
-      }
-
-      // Push pace tier update notification
-      const tier = getTier();
-      document.dispatchEvent(new CustomEvent('routine:tier', { detail: tier }));
-
-      // Monthly savings pace check (run on 1st of each month)
-      if (now.getDate() === 1) {
-        const gap = Math.max(0, 83000 - S.monthly);
-        if (gap > 0) document.dispatchEvent(new CustomEvent('routine:income-gap', { detail: { gap } }));
-      }
-    },
-  };
-
-  // ── 9. MILESTONE AUTO-COMPLETION CHECK ───────────────────
-  // Checks if time-based milestones should be marked automatically
+  /* ── 8. MILESTONE WATCHER ────────────────────────────────── */
   const MilestoneWatcher = {
     check() {
-      const done = getMDone();
-      let changed = false;
-
-      // Milestone 16 (index 16): "Savings baseline" — always done
+      const done = getMDone(); let changed = false;
+      // Savings baseline (index 16) always done
       if (!done[16]) { done[16] = true; changed = true; }
-
-      // If IELTS taken and score ≥ 7.0, auto-complete milestone 3 (IELTS exam)
-      if (Phase.ieltsTaken() && (Phase.ieltsScore() || 0) >= 7.0 && !done[3]) {
-        done[3] = true; changed = true;
-      }
-
-      // If savings ≥ 5000 EUR, auto-complete savings milestone (index 11)
-      if (S.eur() >= 5000 && !done[11]) { done[11] = true; changed = true; }
-      // If savings ≥ 10000 EUR, auto-complete full savings milestone (index 12)
+      // IELTS (index 3) — auto if taken + score ≥ 7
+      if (Phase.ieltsTaken() && (Phase.ieltsScore()||0) >= 7.0 && !done[3]) { done[3] = true; changed = true; }
+      // 5k EUR (index 11)
+      if (S.eur() >= 5000  && !done[11]) { done[11] = true; changed = true; }
+      // 10k EUR (index 12)
       if (S.eur() >= 10000 && !done[12]) { done[12] = true; changed = true; }
-
-      if (changed) {
-        setMDone(done);
-        AutoSave.touch();
-        document.dispatchEvent(new CustomEvent('milestones:updated'));
-      }
+      if (changed) { setMDone(done); AutoSave.touch(); document.dispatchEvent(new CustomEvent('milestones:updated')); }
     },
   };
 
-  // ── 10. PUBLIC API ────────────────────────────────────────
-  return {
-    // Expose sub-modules
-    Clock,
-    Phase,
-    Routine,
-    Drive,
-    Cal,
-    Ticker,
-    AutoSave,
-    RoutineUpdater,
-    MilestoneWatcher,
+  /* ── 9. WEB PUSH NOTIFICATIONS ───────────────────────────── */
+  const Notifs = {
+    supported() { return 'Notification' in window; },
+    enabled()   { return localStorage.getItem('push_notifs') === 'true'; },
+    async requestPermission() {
+      if (!this.supported()) return false;
+      const p = await Notification.requestPermission();
+      const ok = p === 'granted';
+      localStorage.setItem('push_notifs', String(ok));
+      document.dispatchEvent(new CustomEvent('ui:refresh'));
+      return ok;
+    },
+    send(title, body, opts = {}) {
+      if (!this.supported() || Notification.permission !== 'granted') return;
+      try { new Notification(title, { body, icon:'https://anwaydiptapaul.github.io/life-plan/icon.png', ...opts }); }
+      catch {}
+    },
+    scheduleBlockReminder() {
+      if (!this.enabled()) return;
+      const nb = Routine.nextBlock();
+      if (!nb) return;
+      const parts = nb.t.split('–');
+      if (!parts.length) return;
+      const [h, m] = parts[0].split(':').map(Number);
+      const now  = Clock.now();
+      const next = new Date(now); next.setHours(h, m, 0, 0);
+      if (next <= now) return;
+      const msUntil = next - now - 5 * 60 * 1000; // 5 min before
+      if (msUntil < 0) return;
+      setTimeout(() => this.send('Sprint OS', `Starting in 5 min: ${nb.n}`, { tag:'block-reminder' }), msUntil);
+    },
+  };
 
-    // ── Bootstrap — call once on each page ──────────────────
+  /* ── 10. CONFETTI ────────────────────────────────────────── */
+  function fireConfetti() {
+    const canvas = document.createElement('canvas');
+    canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:99999';
+    document.body.appendChild(canvas);
+    const ctx = canvas.getContext('2d');
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const particles = [...Array(120)].map(() => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * -canvas.height,
+      w: 6 + Math.random() * 6,
+      h: 10 + Math.random() * 6,
+      color: ['#00e5a0','#ffb020','#ff4444','#4488ff','#aa66ff','#ff7722'][Math.floor(Math.random()*6)],
+      rot: Math.random() * Math.PI * 2,
+      vx: (Math.random() - 0.5) * 3,
+      vy: 3 + Math.random() * 4,
+      vr: (Math.random() - 0.5) * 0.2,
+    }));
+    let done = 0;
+    function frame() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      let active = 0;
+      for (const p of particles) {
+        p.x += p.vx; p.y += p.vy; p.rot += p.vr; p.vy += 0.12;
+        if (p.y < canvas.height + 20) {
+          active++;
+          ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+          ctx.restore();
+        }
+      }
+      if (active > 0 && done < 180) { done++; requestAnimationFrame(frame); }
+      else canvas.remove();
+    }
+    requestAnimationFrame(frame);
+  }
+
+  /* ── 11. PWA INSTALL PROMPT ──────────────────────────────── */
+  let _deferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    _deferredPrompt = e;
+    document.dispatchEvent(new CustomEvent('pwa:installable'));
+  });
+
+  /* ── 12. ROUTINE UPDATER ─────────────────────────────────── */
+  const RoutineUpdater = {
+    run() {
+      const t = getTier();
+      document.dispatchEvent(new CustomEvent('routine:tier', { detail: t }));
+      if (Clock.isSaturday() && Phase.isPreIelts()) document.dispatchEvent(new CustomEvent('routine:saturday-mock'));
+      if (daysUntil(EDX_DATE) <= 3) document.dispatchEvent(new CustomEvent('routine:edx-critical'));
+      if (Clock.now().getDate() === 1 && S.monthly < 83000) document.dispatchEvent(new CustomEvent('routine:income-gap', { detail:{ gap: 83000 - S.monthly } }));
+    },
+  };
+
+  /* ── 13. TOAST SYSTEM ────────────────────────────────────── */
+  function _toast(id, html, type, duration) {
+    if (document.getElementById(id)) return;
+    const tc = document.getElementById('toast-container') || document.body;
+    const t  = document.createElement('div');
+    t.id = id; t.className = `toast toast-${type}`;
+    t.innerHTML = `<span>${html}</span><button class="toast-close" onclick="this.parentElement.remove()">✕</button>`;
+    tc.appendChild(t);
+    if (duration > 0) setTimeout(() => t?.remove(), duration);
+  }
+
+  /* ── 14. PUBLIC API ──────────────────────────────────────── */
+  return {
+    Clock, Phase, Routine, Drive, Cal, Ticker, AutoSave, MilestoneWatcher, Notifs,
+
     async init() {
-      // 1. Load local fallback immediately (instant UI)
+      // 1. Restore local state immediately (instant UI, no waiting)
       Drive.loadLocal();
 
-      // 2. Run milestone watchers
+      // 2. Auto-completions
       MilestoneWatcher.check();
 
       // 3. Start live clock
       Ticker.start();
 
-      // 4. Run routine logic
+      // 4. Routine logic
       RoutineUpdater.run();
 
-      // 5. Try Google API (non-blocking — UI works without it)
-      this._initGapi();
+      // 5. Schedule block notification (5min warning)
+      if (Notifs.enabled()) Notifs.scheduleBlockReminder();
 
-      // 6. Listen for midnight routine refresh
+      // 6. Attempt Google API (non-blocking)
+      this._tryGapi();
+
+      // 7. Event listeners
       document.addEventListener('routine:refresh', () => {
         RoutineUpdater.run();
         MilestoneWatcher.check();
         document.dispatchEvent(new CustomEvent('ui:refresh'));
       });
-
-      // 7. Listen for IELTS phase-switch suggestion
       document.addEventListener('phase:suggest-switch', () => {
-        if (document.getElementById('phase-switch-toast')) return;
-        this._showToast(
-          'phase-switch-toast',
-          '📅 IELTS exam date has passed — did you take it? <a href="milestones.html#ielts-status" class="toast-link">Update status</a>',
-          'warn', 12000
-        );
+        _toast('phase-toast',
+          '📅 IELTS date has passed. Did you take it? <a href="milestones.html#ielts-section" class="toast-link">Log score →</a>',
+          'warn', 15000);
       });
-
-      // 8. Saturday mock test reminder
       document.addEventListener('routine:saturday-mock', () => {
-        this._showToast('sat-mock-toast',
-          '📝 Saturday — full 4-band IELTS mock test today. Have you scheduled it?',
-          'info', 8000);
+        _toast('sat-toast', '📝 Saturday — full 4-band IELTS mock test today.', 'info', 8000);
+      });
+      document.addEventListener('routine:edx-critical', () => {
+        _toast('edx-toast', `⚠️ edX expires in <strong>${daysUntil(EDX_DATE)} days</strong> — open a lesson now.`, 'danger', 0);
+      });
+      document.addEventListener('pwa:installable', () => {
+        _toast('pwa-toast',
+          '📱 Install Sprint OS on your home screen? <a onclick="U.installPWA()" class="toast-link" style="cursor:pointer">Install →</a>',
+          'info', 20000);
       });
 
-      // 9. edX critical warning
-      document.addEventListener('routine:edx-critical', () => {
-        this._showToast('edx-crit-toast',
-          `⚠️ edX expires in <strong>${daysUntil(D.edx)} days</strong> — open a lesson immediately.`,
-          'danger', 0);
-      });
+      // Signal to all pages that init is complete
+      document.dispatchEvent(new CustomEvent('ui:refresh'));
     },
 
-    async _initGapi() {
+    async _tryGapi() {
       try {
-        // Only init if the gapi script is present on the page
         if (typeof gapi === 'undefined') return;
         await Drive.initGapi();
         document.dispatchEvent(new CustomEvent('gapi:ready'));
       } catch (e) {
-        console.info('Google API not configured or unavailable:', e.message);
+        console.info('Google API unavailable:', e.message || e);
       }
     },
 
-    // ── Trigger a full save (call after any state mutation) ──
+    // ── Public methods ────────────────────────────────────────
     save() { AutoSave.touch(); },
 
-    // ── Mark IELTS as taken ──────────────────────────────────
     markIeltsTaken(score) {
       Phase.setIeltsTaken(score);
       MilestoneWatcher.check();
+      if (score >= 7.0) {
+        fireConfetti();
+        Notifs.send('🎉 IELTS Passed!', `Band ${score} — OU application eligibility unlocked.`);
+        _toast('ielts-pass-toast', `🎉 Band <strong>${score}</strong> — OU application now eligible! Renew Coursera next.`, 'ok', 0);
+      }
       AutoSave.now();
       document.dispatchEvent(new CustomEvent('ui:refresh'));
-      // Add "Well done" Calendar event
       if (Cal.enabled() && Drive._signedIn) {
-        gapi.client.calendar.events.insert({
-          calendarId: GAPI_CONFIG.calendarId,
-          resource: {
-            summary:  `✅ IELTS Taken — Score: ${score}`,
-            start:    { date: Clock.iso().slice(0, 10) },
-            end:      { date: Clock.iso().slice(0, 10) },
-            colorId:  '2',
-          },
-        }).catch(() => {});
+        gapi.client.calendar.events.insert({ calendarId:GAPI_CONFIG.calendarId, resource:{ summary:`✅ IELTS Score: ${score}`, start:{date:Clock.dateStr()}, end:{date:Clock.dateStr()}, colorId:'2' } }).catch(()=>{});
       }
     },
 
-    // ── Update savings ───────────────────────────────────────
     updateSavings(bdt, monthly) {
-      S.bdt     = bdt;
-      S.monthly = monthly;
-      S.save();
+      const prev = S.bdt;
+      S.bdt = bdt;
+      if (monthly !== undefined) S.monthly = monthly;
+      addSavingsEntry(bdt, prev);
       MilestoneWatcher.check();
       AutoSave.touch();
-      document.dispatchEvent(new CustomEvent('savings:updated', { detail: { bdt, monthly } }));
+      document.dispatchEvent(new CustomEvent('savings:updated', { detail:{ bdt, monthly } }));
     },
 
-    // ── Toggle a milestone ───────────────────────────────────
     toggleMilestone(idx) {
-      const done = getMDone();
       if (MILESTONES[idx]?.type === 'done') return;
+      const done = getMDone();
       done[idx] = !done[idx];
       setMDone(done);
-      // If milestone has a horizon date, add to calendar
-      if (done[idx] && Cal.enabled() && Drive._signedIn) {
-        Cal.addMilestoneEvent(MILESTONES[idx]).catch(() => {});
+      // Confetti on major milestones
+      if (done[idx] && (MILESTONES[idx]?.pri || MILESTONES[idx]?.type === 'priority')) {
+        fireConfetti();
+        Notifs.send('Milestone reached!', MILESTONES[idx].t);
       }
+      if (done[idx] && Cal.enabled() && Drive._signedIn) Cal.addMilestoneEvent(MILESTONES[idx]);
       AutoSave.touch();
       document.dispatchEvent(new CustomEvent('milestones:updated'));
     },
 
-    // ── Toggle a course ──────────────────────────────────────
     toggleCourse(idx) {
       const flat = flatCourses();
-      if (flat[idx]?.fixed) return;
+      if (flat[idx]?.fixed || flat[idx]?.drop) return;
       const done = getCDone();
       done[idx] = !done[idx];
       setCDone(done);
       AutoSave.touch();
-      document.dispatchEvent(new CustomEvent('courses:updated', { detail: { idx } }));
+      document.dispatchEvent(new CustomEvent('courses:updated', { detail:{ idx } }));
     },
 
-    // ── Add today's schedule to Google Calendar ──────────────
-    async scheduleToday() {
-      if (!Drive._signedIn) {
-        this._showToast('cal-toast', 'Sign in to Google to add events to Calendar.', 'warn', 4000);
-        return;
+    toggleMathChapter(topicIdx, chapIdx) {
+      const key = `${topicIdx}_${chapIdx}`;
+      const d   = getMathDone();
+      d[key]    = !d[key];
+      setMathDone(d);
+      AutoSave.touch();
+      document.dispatchEvent(new CustomEvent('math:updated'));
+    },
+
+    toggleOUItem(id) {
+      toggleOUItem(id);
+      // Confetti when all done
+      const d = getOUDone();
+      if (OU_CHECKLIST.every(item => d[item.id])) {
+        fireConfetti();
+        _toast('ou-done-toast','🚀 OU Application Checklist complete! Submit now.','ok',0);
       }
-      const count = await Cal.addTodaySchedule();
-      this._showToast('cal-toast', `✅ Added ${count} events to Google Calendar.`, 'ok', 4000);
+      AutoSave.touch();
+      document.dispatchEvent(new CustomEvent('ou:updated'));
     },
 
-    // ── Add all milestone deadlines to Calendar ──────────────
+    async scheduleToday() {
+      if (!Drive._signedIn) { _toast('cal-auth-toast','Sign in to Google to add events to Calendar.','warn',4000); return; }
+      const n = await Cal.addTodaySchedule();
+      _toast('cal-ok-toast', `✅ Added ${n} events to Google Calendar.`, 'ok', 4000);
+    },
+
     async scheduleAllMilestones() {
       if (!Drive._signedIn) return;
-      let added = 0;
-      for (const m of MILESTONES) {
-        await Cal.addMilestoneEvent(m).catch(() => {});
-        added++;
-      }
-      await Cal.addIeltsExam().catch(() => {});
-      await Cal.addEdxExpiry().catch(() => {});
-      this._showToast('cal-all-toast', `✅ Added ${added + 2} milestone events to Google Calendar.`, 'ok', 5000);
+      for (const m of MILESTONES) await Cal.addMilestoneEvent(m);
+      await Cal.addEdxExpiry();
+      await Cal.addIeltsExam();
+      _toast('cal-all-toast', `✅ All milestone dates added to Google Calendar.`, 'ok', 5000);
     },
 
-    // ── Toast notification ───────────────────────────────────
-    _showToast(id, html, type, duration) {
-      if (document.getElementById(id)) return;
-      const t = document.createElement('div');
-      t.id        = id;
-      t.className = `toast toast-${type}`;
-      t.innerHTML = `<span>${html}</span><button class="toast-close" onclick="this.parentElement.remove()">✕</button>`;
-      document.getElementById('toast-container')?.appendChild(t) ||
-        document.body.appendChild(t);
-      if (duration > 0) setTimeout(() => t.remove(), duration);
+    async requestNotifications() {
+      const ok = await Notifs.requestPermission();
+      _toast('notif-toast', ok ? '✅ Notifications enabled.' : '❌ Permission denied.', ok ? 'ok' : 'danger', 4000);
     },
 
-    // ── Returns live summary for the dashboard ───────────────
+    async installPWA() {
+      if (!_deferredPrompt) return;
+      _deferredPrompt.prompt();
+      const { outcome } = await _deferredPrompt.userChoice;
+      _deferredPrompt = null;
+      if (outcome === 'accepted') _toast('pwa-ok','✅ Sprint OS installed on home screen.','ok',4000);
+    },
+
+    fireConfetti,
+
     liveSummary() {
       return {
-        greeting:        Routine.greeting(),
-        dailyPriority:   Routine.dailyPriority(),
-        currentBlock:    Routine.currentBlock(),
-        nextBlock:       Routine.nextBlock(),
-        daysToEdx:       Routine.daysToEdx(),
-        daysToIelts:     Routine.daysToIelts(),
-        daysToOuApp:     Routine.daysToOuApp(),
-        planMonth:       Phase.planMonth(),
-        tier:            getTier(),
-        savingsPct:      S.pct(),
-        savingsEur:      S.eur(),
-        mDone:           getMDone().filter(Boolean).length,
-        mTotal:          MILESTONES.length,
-        cDone:           getCDone().filter(Boolean).length,
-        cTotal:          flatCourses().length,
-        isPreIelts:      Phase.isPreIelts(),
-        isWeekend:       Clock.isWeekend(),
-        isSaturday:      Clock.isSaturday(),
-        signedIn:        Drive._signedIn,
+        greeting:      Routine.greeting(),
+        dailyPriority: Routine.dailyPriority(),
+        currentBlock:  Routine.currentBlock(),
+        nextBlock:     Routine.nextBlock(),
+        daysToEdx:     daysUntil(EDX_DATE),
+        daysToIelts:   daysUntil(IELTS_DATE),
+        daysToOuApp:   daysUntil(OUAPP_DATE),
+        planMonth:     planMonth(),
+        tier:          getTier(),
+        savingsPct:    S.pct(),
+        savingsEur:    S.eur(),
+        mDone:         getMDone().filter(Boolean).length,
+        mTotal:        MILESTONES.length,
+        cDone:         getCDone().filter(Boolean).length,
+        cTotal:        flatCourses().length,
+        isPreIelts:    Phase.isPreIelts(),
+        isSaturday:    Clock.isSaturday(),
+        isSunday:      Clock.isSunday(),
+        signedIn:      Drive._signedIn,
+        notifEnabled:  Notifs.enabled(),
+        notifSupported:Notifs.supported(),
       };
     },
   };
 })();
 
-/* ═══════════════════════════════════════════════════════════
-   TOAST STYLES (injected at runtime, no extra CSS file needed)
-═══════════════════════════════════════════════════════════ */
-(function injectToastStyles() {
-  const style = document.createElement('style');
-  style.textContent = `
-    #toast-container { position:fixed; bottom:24px; right:24px; z-index:9000; display:flex; flex-direction:column; gap:8px; max-width:340px; }
-    .toast {
-      display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
-      padding:12px 14px; border-radius:2px; border:1px solid;
-      font-family:var(--font-mono); font-size:11px; line-height:1.6;
-      animation: toast-in .25s ease;
-      box-shadow: 0 8px 24px rgba(0,0,0,.5);
-    }
-    @keyframes toast-in { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:none} }
-    .toast-ok      { background:rgba(0,229,160,.08); border-color:rgba(0,229,160,.3); color:#80f0cc; }
-    .toast-warn    { background:rgba(255,176,32,.08); border-color:rgba(255,176,32,.3); color:#ffe090; }
-    .toast-danger  { background:rgba(255,68,68,.08);  border-color:rgba(255,68,68,.3);  color:#ffaaaa; }
-    .toast-info    { background:rgba(68,136,255,.08); border-color:rgba(68,136,255,.3); color:#aaccff; }
-    .toast-close { background:none; border:none; color:inherit; cursor:pointer; font-size:11px; flex-shrink:0; opacity:.6; padding:0; }
-    .toast-close:hover { opacity:1; }
-    .toast-link { color:inherit; text-decoration:underline; }
-    .sync-status { font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:var(--text3); }
-    .sync-saved  { color:var(--green); }
-    .sync-local  { color:var(--amber); }
-    .sync-loaded { color:var(--blue); }
-    .sched-now { background:rgba(0,229,160,.06) !important; border-color:rgba(0,229,160,.25) !important; }
-    .now-badge {
-      display:inline-block; font-size:8px; letter-spacing:.12em; text-transform:uppercase;
-      color:var(--green); border:1px solid rgba(0,229,160,.35); background:rgba(0,229,160,.1);
-      padding:1px 6px; border-radius:2px; margin-bottom:4px; font-weight:600;
-      animation:now-pulse 1.5s ease infinite;
-    }
-    @keyframes now-pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
-    /* Google sign-in button */
-    .gapi-btn {
-      display:flex; align-items:center; gap:8px;
-      padding:8px 14px; border-radius:2px;
-      border:1px solid var(--border2); background:var(--bg2);
-      font-family:var(--font-mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase;
-      color:var(--text3); cursor:pointer; transition:all .15s;
-    }
-    .gapi-btn:hover { border-color:var(--border3); color:var(--text); }
-    .gapi-btn.signed-in { border-color:rgba(0,229,160,.35); color:var(--green); }
-    .gapi-btn.signed-in:hover { background:rgba(0,229,160,.08); }
+/* ── INJECTED STYLES ──────────────────────────────────────── */
+(function() {
+  const s = document.createElement('style');
+  s.textContent = `
+    #toast-container{position:fixed;bottom:24px;right:24px;z-index:9000;display:flex;flex-direction:column;gap:8px;max-width:360px}
+    .toast{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:12px 14px;border-radius:2px;border:1px solid;font-family:var(--font-mono,monospace);font-size:11px;line-height:1.6;animation:toast-in .25s ease;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+    @keyframes toast-in{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+    .toast-ok     {background:rgba(0,229,160,.08);border-color:rgba(0,229,160,.3);color:#80f0cc}
+    .toast-warn   {background:rgba(255,176,32,.08);border-color:rgba(255,176,32,.3);color:#ffe090}
+    .toast-danger {background:rgba(255,68,68,.08); border-color:rgba(255,68,68,.3); color:#ffaaaa}
+    .toast-info   {background:rgba(68,136,255,.08);border-color:rgba(68,136,255,.3);color:#aaccff}
+    .toast-close{background:none;border:none;color:inherit;cursor:pointer;font-size:11px;flex-shrink:0;opacity:.6;padding:0}
+    .toast-close:hover{opacity:1}
+    .toast-link{color:inherit;text-decoration:underline;cursor:pointer}
+    .sync-status{font-size:9px;letter-spacing:.1em;text-transform:uppercase}
+    .sync-saved{color:#00e5a0}.sync-local{color:#ffb020}.sync-loaded{color:#4488ff}
+    .sched-now{background:rgba(0,229,160,.06)!important;border-color:rgba(0,229,160,.25)!important}
+    .now-badge{display:inline-block;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:#00e5a0;border:1px solid rgba(0,229,160,.35);background:rgba(0,229,160,.1);padding:1px 6px;border-radius:2px;margin-bottom:4px;font-weight:600;animation:now-pulse 1.5s ease infinite}
+    @keyframes now-pulse{0%,100%{opacity:1}50%{opacity:.4}}
+    .gapi-btn{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:2px;border:1px solid var(--border2,#263040);background:var(--bg2,#111620);font-family:var(--font-mono,monospace);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3,#4a5878);cursor:pointer;transition:all .15s}
+    .gapi-btn:hover{border-color:var(--border3,#2e3a50);color:var(--text,#c8d4e8)}
+    .gapi-btn.signed-in{border-color:rgba(0,229,160,.35);color:#00e5a0}
   `;
-  document.head.appendChild(style);
-  // Inject toast container
+  document.head.appendChild(s);
+
   document.addEventListener('DOMContentLoaded', () => {
-    const tc = document.createElement('div');
-    tc.id = 'toast-container';
-    document.body.appendChild(tc);
+    if (!document.getElementById('toast-container')) {
+      const tc = document.createElement('div');
+      tc.id = 'toast-container';
+      document.body.appendChild(tc);
+    }
+  });
+
+  // Guaranteed init: fire U.init() on DOMContentLoaded regardless of gapi
+  document.addEventListener('DOMContentLoaded', () => {
+    // Small delay to let gapi.js attempt load, then init regardless
+    setTimeout(() => {
+      if (window.U && typeof window.U.init === 'function') {
+        window.U.init().catch(() => {});
+        window._sprintInitDone = true;
+      }
+    }, 300);
   });
 })();

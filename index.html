@@ -5,245 +5,220 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Sprint OS · Dashboard</title>
 <link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#00e5a0">
 <style>
-.hero {
-  display:grid; grid-template-columns:1fr 1fr;
-  gap:16px; margin-bottom:24px;
-}
-.hero-main {
-  background:var(--bg2); border:1px solid var(--border2);
-  border-left:3px solid var(--green); border-radius:var(--radius);
-  padding:28px 30px; grid-column:1;
-}
-.hero-greeting { font-family:var(--font-display); font-size:clamp(1.8rem,4vw,3rem); letter-spacing:.04em; line-height:1.1; margin-bottom:8px; }
-.hero-greeting .acc { color:var(--green); }
-.hero-priority { font-size:12px; color:var(--amber); margin-top:12px; padding:10px 14px; background:rgba(255,176,32,.06); border:1px solid rgba(255,176,32,.2); border-radius:2px; }
-.hero-clock { font-family:var(--font-display); font-size:3.5rem; letter-spacing:.06em; color:var(--text3); margin-top:16px; }
-.hero-date  { font-size:10px; color:var(--text3); letter-spacing:.14em; text-transform:uppercase; margin-top:2px; }
-
-.now-block-card {
-  background:var(--bg2); border:1px solid var(--border2);
-  border-top:3px solid var(--green); border-radius:var(--radius);
-  padding:20px 22px;
-}
-.nb-label { font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:var(--text3); margin-bottom:6px; }
-.nb-name  { font-family:var(--font-display); font-size:1.4rem; letter-spacing:.04em; color:var(--green); margin-bottom:4px; }
-.nb-desc  { font-size:11px; color:var(--text3); line-height:1.5; }
-.nb-tag   { display:inline-block; font-size:8px; letter-spacing:.1em; text-transform:uppercase; padding:2px 6px; border-radius:2px; border:1px solid; margin-top:8px; }
-
-.countdown-row { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:24px; }
-.cd-card { background:var(--bg2); border:1px solid var(--border2); border-radius:var(--radius); padding:14px 16px; text-align:center; }
-.cd-num  { font-family:var(--font-display); font-size:2.2rem; letter-spacing:.04em; line-height:1; }
-.cd-lbl  { font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--text3); margin-top:4px; }
-.cd-date { font-size:9px; color:var(--dim); margin-top:2px; }
-
-.quick-actions { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:28px; }
-
-.sync-bar {
-  background:var(--bg2); border:1px solid var(--border2);
-  border-radius:var(--radius); padding:12px 18px;
-  display:flex; align-items:center; gap:12px; flex-wrap:wrap;
-  margin-bottom:24px;
-}
-.sync-bar-label { font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--text3); }
-
-@media(max-width:768px){
-  .hero { grid-template-columns:1fr; }
-  .countdown-row { grid-template-columns:1fr 1fr; }
-}
+.hero{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px}
+.hero-main{background:var(--bg2);border:1px solid var(--border2);border-left:3px solid var(--green);border-radius:var(--r);padding:26px 28px}
+.hero-greeting{font-family:var(--font-display);font-size:clamp(1.8rem,4vw,3rem);letter-spacing:.04em;line-height:1.1;margin-bottom:8px}
+.hero-greeting .acc{color:var(--green)}
+.hero-priority{font-size:12px;color:var(--amber);margin-top:12px;padding:9px 13px;background:rgba(255,176,32,.06);border:1px solid rgba(255,176,32,.2);border-radius:var(--r)}
+.hero-clock{font-family:var(--font-display);font-size:3.2rem;letter-spacing:.06em;color:var(--text3);margin-top:14px;line-height:1}
+.hero-date{font-size:10px;color:var(--text3);letter-spacing:.13em;text-transform:uppercase;margin-top:3px}
+.now-card{background:var(--bg2);border:1px solid var(--border2);border-top:2px solid var(--green);border-radius:var(--r);padding:18px 20px}
+.nc-label{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:5px}
+.nc-name{font-family:var(--font-display);font-size:1.3rem;letter-spacing:.04em;color:var(--green);margin-bottom:3px;line-height:1.2}
+.nc-desc{font-size:10px;color:var(--text3);line-height:1.5}
+.nc-tag{display:inline-block;font-size:8px;letter-spacing:.1em;text-transform:uppercase;padding:2px 5px;border-radius:2px;border:1px solid rgba(0,229,160,.3);color:var(--green);margin-top:7px}
+.cd-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:22px}
+.cd-card{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:13px 15px;text-align:center}
+.cd-num{font-family:var(--font-display);font-size:2.1rem;letter-spacing:.04em;line-height:1}
+.cd-lbl{font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--text3);margin-top:4px}
+.cd-date{font-size:8.5px;color:var(--dim);margin-top:2px}
+.sync-bar{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:11px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:22px}
+.sync-bar-label{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--text3);flex-shrink:0}
+.ielts-panel{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:4px}
+.quick-links{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+@media(max-width:768px){.hero{grid-template-columns:1fr}.cd-row{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
-
-<div id="nav-placeholder"></div>
-
+<div id="nav-ph"></div>
 <main class="main fade-in">
 
   <!-- HERO -->
   <div class="hero">
     <div class="hero-main">
-      <div class="hero-greeting">
-        <span id="greeting-text">Good morning,</span><br>
-        <span class="acc">Anway.</span>
-      </div>
-      <div class="hero-priority" id="daily-priority">Loading...</div>
+      <div class="hero-greeting"><span id="greeting">Good morning,</span><br><span class="acc">Anway.</span></div>
+      <div class="hero-priority" id="daily-priority">Loading…</div>
       <div class="hero-clock" id="live-clock">--:--</div>
       <div class="hero-date"  id="live-date-full">—</div>
     </div>
-
-    <div style="display:flex;flex-direction:column;gap:12px">
-      <div class="now-block-card">
-        <div class="nb-label">▶ Now</div>
-        <div class="nb-name" id="now-block-name">—</div>
-        <div class="nb-desc" id="now-block-desc">—</div>
-        <span class="nb-tag" id="now-block-tag" style="color:var(--green);border-color:rgba(0,229,160,.3)">—</span>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="now-card">
+        <div class="nc-label">▶ Now</div>
+        <div class="nc-name" id="now-name">—</div>
+        <div class="nc-desc" id="now-desc">—</div>
+        <span class="nc-tag" id="now-tag">—</span>
       </div>
-      <div class="now-block-card" style="border-top-color:var(--text3)">
-        <div class="nb-label">⏭ Next</div>
-        <div class="nb-name" id="next-block-name" style="color:var(--text2)">—</div>
-        <div class="nb-desc" id="next-block-desc">—</div>
+      <div class="now-card" style="border-top-color:var(--text3)">
+        <div class="nc-label">⏭ Next</div>
+        <div class="nc-name" id="next-name" style="color:var(--text2)">—</div>
+        <div class="nc-desc" id="next-desc">—</div>
       </div>
     </div>
   </div>
 
   <!-- COUNTDOWNS -->
-  <div class="countdown-row">
+  <div class="cd-row">
     <div class="cd-card" style="border-top:2px solid var(--red)">
       <div class="cd-num" style="color:var(--red)" id="cnt-edx">—</div>
-      <div class="cd-lbl">Days to edX Expiry</div>
+      <div class="cd-lbl">Days · edX Expiry</div>
       <div class="cd-date">Jun 26 2026</div>
     </div>
     <div class="cd-card" style="border-top:2px solid var(--amber)">
       <div class="cd-num" style="color:var(--amber)" id="cnt-ielts">—</div>
-      <div class="cd-lbl">Days to IELTS Exam</div>
-      <div class="cd-date">Target: Jul 2026</div>
+      <div class="cd-lbl">Days · IELTS Target</div>
+      <div class="cd-date">Jul 2026</div>
     </div>
     <div class="cd-card" style="border-top:2px solid var(--blue)">
       <div class="cd-num" style="color:var(--blue)" id="cnt-ou">—</div>
-      <div class="cd-lbl">Days to OU Application</div>
-      <div class="cd-date">Target: Nov 2027</div>
+      <div class="cd-lbl">Days · OU Application</div>
+      <div class="cd-date">Nov 2027</div>
     </div>
   </div>
 
   <!-- STATS -->
   <div class="stat-grid delay-2">
-    <div class="card lift">
-      <div class="card-accent-bar" style="background:linear-gradient(90deg,var(--green),var(--teal))"></div>
+    <div class="card lift glow-g">
+      <div class="card-accent" style="background:linear-gradient(90deg,var(--green),var(--teal))"></div>
       <div class="card-label">Savings Progress</div>
-      <div class="card-value green" id="stat-savings-pct">—%</div>
-      <div class="card-sub" id="stat-savings-sub">— EUR of 10,000 EUR</div>
+      <div class="card-value green" id="st-savings-pct">—%</div>
+      <div class="card-sub" id="st-savings-sub">— EUR of 10,000 EUR</div>
       <div class="micro-bar"><div class="micro-fill" id="mf-savings" style="background:linear-gradient(90deg,var(--green),var(--teal))"></div></div>
     </div>
     <div class="card lift">
-      <div class="card-accent-bar" style="background:linear-gradient(90deg,var(--blue),var(--purple))"></div>
+      <div class="card-accent" style="background:linear-gradient(90deg,var(--blue),var(--purple))"></div>
       <div class="card-label">Courses Done</div>
-      <div class="card-value blue" id="stat-courses">—</div>
-      <div class="card-sub" id="stat-courses-sub">of — total</div>
+      <div class="card-value blue" id="st-courses">—</div>
+      <div class="card-sub" id="st-courses-sub">of — total</div>
       <div class="micro-bar"><div class="micro-fill" id="mf-courses" style="background:linear-gradient(90deg,var(--blue),var(--purple))"></div></div>
     </div>
-    <div class="card lift">
-      <div class="card-accent-bar" style="background:linear-gradient(90deg,var(--amber),var(--orange))"></div>
+    <div class="card lift glow-a">
+      <div class="card-accent" style="background:linear-gradient(90deg,var(--amber),var(--orange))"></div>
       <div class="card-label">Plan Month</div>
-      <div class="card-value amber" id="stat-month">—</div>
+      <div class="card-value amber" id="st-month">—</div>
       <div class="card-sub">of 18 months</div>
       <div class="micro-bar"><div class="micro-fill" id="mf-month" style="background:linear-gradient(90deg,var(--amber),var(--orange))"></div></div>
     </div>
     <div class="card lift">
-      <div class="card-accent-bar" style="background:linear-gradient(90deg,var(--purple),var(--blue))"></div>
+      <div class="card-accent" style="background:linear-gradient(90deg,var(--purple),var(--blue))"></div>
       <div class="card-label">Milestones Hit</div>
-      <div class="card-value purple" id="stat-miles">—</div>
-      <div class="card-sub" id="stat-miles-sub">of — milestones</div>
+      <div class="card-value purple" id="st-miles">—</div>
+      <div class="card-sub" id="st-miles-sub">of — milestones</div>
       <div class="micro-bar"><div class="micro-fill" id="mf-miles" style="background:linear-gradient(90deg,var(--purple),var(--blue))"></div></div>
     </div>
     <div class="card lift">
-      <div class="card-accent-bar" style="background:linear-gradient(90deg,var(--red),var(--orange))"></div>
+      <div class="card-accent" style="background:linear-gradient(90deg,var(--orange),var(--amber))"></div>
       <div class="card-label">Pace Tier</div>
-      <div class="card-value" id="stat-tier" style="color:var(--orange)">—</div>
-      <div class="card-sub" id="stat-tier-sub">—</div>
+      <div class="card-value" id="st-tier" style="color:var(--orange)">—</div>
+      <div class="card-sub" id="st-tier-sub">—</div>
       <div class="micro-bar"><div class="micro-fill" id="mf-tier" style="background:linear-gradient(90deg,var(--orange),var(--amber))"></div></div>
+    </div>
+    <div class="card lift">
+      <div class="card-accent" style="background:linear-gradient(90deg,var(--red),var(--orange))"></div>
+      <div class="card-label">Today's Habits</div>
+      <div class="card-value red" id="st-habits">—</div>
+      <div class="card-sub">of 5 checked today</div>
+      <div class="micro-bar"><div class="micro-fill" id="mf-habits" style="background:linear-gradient(90deg,var(--red),var(--orange))"></div></div>
     </div>
   </div>
 
   <!-- TIMELINE -->
-  <div class="sec-head">
-    <div class="sec-title">18-Month Timeline</div>
-    <div class="sec-line"></div>
-    <div class="sec-tag dim" id="tl-month-tag">Month — of 18</div>
+  <div class="sec-head"><div class="sec-title">18-Month Timeline</div><div class="sec-line"></div><div class="sec-tag dim" id="tl-tag">Month — of 18</div></div>
+  <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:16px 20px;margin-bottom:22px">
+    <div id="tl-ph"></div>
   </div>
-  <div id="timeline-placeholder"></div>
 
-  <!-- SYNC / GOOGLE -->
-  <div class="sync-bar delay-3">
+  <!-- GOOGLE SYNC -->
+  <div class="sync-bar">
     <span class="sync-bar-label">Google Sync</span>
-    <button class="gapi-btn" id="gapi-btn" onclick="handleGapiBtn()">
-      <span id="gapi-btn-text">Sign in with Google</span>
-    </button>
-    <button class="btn btn-ghost" onclick="U.scheduleToday()" title="Add today's schedule to Google Calendar">📅 Schedule Today</button>
-    <button class="btn btn-ghost" onclick="U.scheduleAllMilestones()" title="Add all milestone dates to Google Calendar">🎯 Add Milestones</button>
+    <button class="gapi-btn" id="gapi-btn" onclick="handleGapiBtn()"><span id="gapi-txt">Sign in with Google</span></button>
+    <button class="btn btn-ghost" onclick="U.scheduleToday()">📅 Schedule Today</button>
+    <button class="btn btn-ghost" onclick="U.scheduleAllMilestones()">🎯 All Milestones to Calendar</button>
+    <button class="btn btn-ghost" id="notif-btn" onclick="U.requestNotifications()">🔔 Enable Notifications</button>
     <span class="sync-status" id="sync-status">Not synced</span>
   </div>
 
-  <!-- QUICK ACTIONS -->
-  <div class="sec-head"><div class="sec-title">Quick Actions</div><div class="sec-line"></div></div>
-  <div class="quick-actions">
-    <a href="daily.html"     class="btn btn-primary">Today's Schedule →</a>
-    <a href="courses.html"   class="btn btn-ghost">Course Queue →</a>
-    <a href="milestones.html"class="btn btn-ghost">Milestones →</a>
-    <a href="savings.html"   class="btn btn-ghost">Savings Tracker →</a>
-    <a href="roadmap.html"   class="btn btn-ghost">Roadmap →</a>
-    <button class="btn btn-ghost" onclick="showIeltsModal()">📝 Log IELTS Score</button>
+  <!-- IELTS STATUS -->
+  <div class="sec-head">
+    <div class="sec-title">IELTS Status</div><div class="sec-line"></div>
+    <div class="sec-tag amber" id="ielts-tag">In Prep</div>
+  </div>
+  <div class="ielts-panel">
+    <div class="card">
+      <div class="card-label">Current Status</div>
+      <div class="card-value" id="ielts-val" style="color:var(--amber)">Not taken</div>
+      <div class="card-sub"  id="ielts-sub">Exam date not yet booked</div>
+    </div>
+    <div class="card"><div class="card-label">Target Band</div><div class="card-value amber">7.0</div><div class="card-sub">Academic · Required for OU MPhys</div></div>
+    <div class="card"><div class="card-label">Exam Target</div><div class="card-value">July 2026</div><div class="card-sub">Book slot immediately if not done</div></div>
+    <div class="card" style="cursor:pointer;border-color:rgba(255,176,32,.3)" onclick="showIeltsModal()">
+      <div class="card-label">Log Score</div>
+      <div class="card-value amber">+</div>
+      <div class="card-sub">Click to record exam result</div>
+    </div>
   </div>
 
-  <!-- IELTS STATUS PANEL -->
-  <div class="sec-head"><div class="sec-title">IELTS Status</div><div class="sec-line"></div><div class="sec-tag" id="ielts-tag">—</div></div>
-  <div id="ielts-panel" style="display:flex;gap:12px;flex-wrap:wrap">
-    <div class="card" style="flex:1;min-width:220px" id="ielts-status-card">
-      <div class="card-label">Current Status</div>
-      <div class="card-value" id="ielts-status-val">—</div>
-      <div class="card-sub"  id="ielts-status-sub">—</div>
-    </div>
-    <div class="card" style="flex:1;min-width:220px">
-      <div class="card-label">Target Band</div>
-      <div class="card-value amber">7.0</div>
-      <div class="card-sub">Academic · Required for OU MPhys</div>
-    </div>
-    <div class="card" style="flex:1;min-width:220px">
-      <div class="card-label">Exam Date Target</div>
-      <div class="card-value">July 2026</div>
-      <div class="card-sub">Book slot immediately if not done</div>
-    </div>
+  <!-- QUICK ACTIONS -->
+  <div class="sec-head" style="margin-top:22px"><div class="sec-title">Quick Actions</div><div class="sec-line"></div></div>
+  <div class="quick-links">
+    <a href="daily.html"      class="btn btn-primary">Today's Schedule →</a>
+    <a href="courses.html"    class="btn btn-ghost">Course Queue →</a>
+    <a href="milestones.html" class="btn btn-ghost">Milestones →</a>
+    <a href="savings.html"    class="btn btn-ghost">Savings Tracker →</a>
+    <a href="roadmap.html"    class="btn btn-ghost">Roadmap →</a>
+    <a href="habits.html"     class="btn btn-ghost">Habits →</a>
+    <a href="review.html"     class="btn btn-ghost">Weekly Review →</a>
   </div>
 
 </main>
 
-<!-- IELTS Score Modal -->
-<div id="ielts-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:8000;align-items:center;justify-content:center">
-  <div style="background:var(--bg2);border:1px solid var(--border2);border-top:3px solid var(--green);padding:28px 32px;border-radius:var(--radius);min-width:320px;max-width:420px">
+<!-- IELTS MODAL -->
+<div id="ielts-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:8000;align-items:center;justify-content:center">
+  <div style="background:var(--bg2);border:1px solid var(--border2);border-top:3px solid var(--green);padding:26px 30px;border-radius:var(--r);min-width:320px;max-width:420px">
     <div style="font-family:var(--font-display);font-size:1.4rem;letter-spacing:.05em;margin-bottom:16px">Log IELTS Score</div>
-    <div class="input-row">
-      <span class="input-label">Overall Band Score</span>
-      <input class="field" type="number" id="ielts-score-input" step="0.5" min="1" max="9" placeholder="e.g. 7.5"/>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <div><div style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:4px">Listening</div><input class="field" type="number" id="b-l" step="0.5" min="0" max="9" placeholder="—"/></div>
+      <div><div style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:4px">Reading</div><input class="field" type="number" id="b-r" step="0.5" min="0" max="9" placeholder="—"/></div>
+      <div><div style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:4px">Writing</div><input class="field" type="number" id="b-w" step="0.5" min="0" max="9" placeholder="—"/></div>
+      <div><div style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:4px">Speaking</div><input class="field" type="number" id="b-s" step="0.5" min="0" max="9" placeholder="—"/></div>
     </div>
-    <div style="display:flex;gap:8px;margin-top:16px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+      <div style="font-size:9px;color:var(--text3)">Overall Band:</div>
+      <div style="font-family:var(--font-display);font-size:2rem;color:var(--amber)" id="modal-overall">—</div>
+    </div>
+    <div style="display:flex;gap:8px">
       <button class="btn btn-primary" onclick="submitIelts()">Save Score</button>
-      <button class="btn btn-ghost" onclick="document.getElementById('ielts-modal').style.display='none'">Cancel</button>
+      <button class="btn btn-ghost"   onclick="document.getElementById('ielts-modal').style.display='none'">Cancel</button>
     </div>
-    <div style="font-size:10px;color:var(--text3);margin-top:12px">Saving this will switch the planner to Post-IELTS mode and sync to Google Drive if connected.</div>
+    <div style="font-size:10px;color:var(--text3);margin-top:12px">Saves score, switches to Post-IELTS mode, and syncs to Google Drive.</div>
   </div>
 </div>
 
-<div id="footer-placeholder"></div>
-
-<!-- SCRIPTS -->
+<div id="footer-ph"></div>
 <script src="data.js"></script>
 <script src="update.js"></script>
-<!-- Load Google API (optional — works without it) -->
-<script async defer src="https://apis.google.com/js/api.js" onload="U.init()"></script>
+<script async defer src="https://apis.google.com/js/api.js"></script>
 <script>
-// Fallback init if gapi doesn't load
-window.addEventListener('load', () => {
-  if (!window._gapiInitDone) U.init();
-});
-
 document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('nav-placeholder').innerHTML = buildNavHTML('index.html');
-  document.getElementById('footer-placeholder').innerHTML = buildFooterHTML();
-  document.getElementById('timeline-placeholder').innerHTML = buildTimelineHTML();
+  document.getElementById('nav-ph').innerHTML    = buildNavHTML('index.html');
+  document.getElementById('footer-ph').innerHTML = buildFooterHTML();
+  document.getElementById('tl-ph').innerHTML     = buildTimelineHTML();
   refresh();
 });
 
-document.addEventListener('ui:refresh',        refresh);
-document.addEventListener('savings:updated',   refresh);
-document.addEventListener('milestones:updated',refresh);
-document.addEventListener('state:loaded',      refresh);
+['ui:refresh','savings:updated','milestones:updated','state:loaded','courses:updated'].forEach(e =>
+  document.addEventListener(e, refresh)
+);
 
 document.addEventListener('gapi:auth', e => {
   const btn = document.getElementById('gapi-btn');
-  const txt = document.getElementById('gapi-btn-text');
+  const txt = document.getElementById('gapi-txt');
   if (e.detail.isSignedIn) {
     btn.classList.add('signed-in');
-    const user = gapi?.auth2?.getAuthInstance()?.currentUser?.get()?.getBasicProfile();
-    txt.textContent = '✓ ' + (user?.getEmail() || 'Signed in');
+    const u = gapi?.auth2?.getAuthInstance()?.currentUser?.get()?.getBasicProfile();
+    txt.textContent = '✓ ' + (u?.getEmail() || 'Signed in');
   } else {
     btn.classList.remove('signed-in');
     txt.textContent = 'Sign in with Google';
@@ -251,65 +226,84 @@ document.addEventListener('gapi:auth', e => {
 });
 
 function handleGapiBtn() {
-  if (U.Drive.isSignedIn()) U.Drive.signOut();
-  else U.Drive.signIn();
+  if (U.Drive.isSignedIn()) U.Drive.signOut(); else U.Drive.signIn();
 }
 
 function refresh() {
   const sum = U.liveSummary();
   const t   = sum.tier;
 
-  document.getElementById('greeting-text').textContent = sum.greeting.split(',')[0] + ',';
+  document.getElementById('greeting').textContent         = sum.greeting.split(',')[0] + ',';
+  document.getElementById('daily-priority').textContent   = sum.dailyPriority;
+  document.getElementById('tl-tag').textContent           = 'Month ' + sum.planMonth + ' of 18';
 
   const cb = sum.currentBlock;
-  document.getElementById('now-block-name').textContent = cb ? cb.n : '—';
-  document.getElementById('now-block-desc').textContent = cb ? cb.d : 'No active block.';
-  document.getElementById('now-block-tag').textContent  = cb ? cb.tag.toUpperCase() : '—';
+  document.getElementById('now-name').textContent = cb ? cb.n : '—';
+  document.getElementById('now-desc').textContent = cb ? cb.d : 'No active block.';
+  document.getElementById('now-tag').textContent  = cb ? cb.tag.toUpperCase() : '—';
   const nb = sum.nextBlock;
-  document.getElementById('next-block-name').textContent = nb ? nb.n : '—';
-  document.getElementById('next-block-desc').textContent = nb ? nb.d : '—';
+  document.getElementById('next-name').textContent = nb ? nb.n : '—';
+  document.getElementById('next-desc').textContent = nb ? nb.d : '—';
 
-  document.getElementById('daily-priority').textContent = sum.dailyPriority;
+  // Stats
+  document.getElementById('st-savings-pct').textContent   = sum.savingsPct.toFixed(1) + '%';
+  document.getElementById('st-savings-sub').textContent   = Math.round(sum.savingsEur) + ' EUR of 10,000 EUR';
+  document.getElementById('mf-savings').style.width       = sum.savingsPct + '%';
+  document.getElementById('st-courses').textContent       = sum.cDone;
+  document.getElementById('st-courses-sub').textContent   = 'of ' + sum.cTotal + ' total';
+  document.getElementById('mf-courses').style.width       = (sum.cDone / sum.cTotal * 100) + '%';
+  document.getElementById('st-month').textContent         = sum.planMonth;
+  document.getElementById('mf-month').style.width         = (sum.planMonth / 18 * 100) + '%';
+  document.getElementById('st-miles').textContent         = sum.mDone;
+  document.getElementById('st-miles-sub').textContent     = 'of ' + sum.mTotal + ' milestones';
+  document.getElementById('mf-miles').style.width         = (sum.mDone / sum.mTotal * 100) + '%';
+  document.getElementById('st-tier').textContent          = t.id + ' — ' + t.name;
+  document.getElementById('st-tier').style.color          = t.col;
+  document.getElementById('st-tier-sub').textContent      = t.range;
+  document.getElementById('mf-tier').style.width          = t.fillPct + '%';
 
-  const sp = sum.savingsPct.toFixed(1);
-  const se = Math.round(sum.savingsEur);
-  document.getElementById('stat-savings-pct').textContent = sp + '%';
-  document.getElementById('stat-savings-sub').textContent = se + ' EUR of 10,000 EUR';
-  document.getElementById('mf-savings').style.width = sp + '%';
+  // Habits today
+  const h = getHabits(new Date().toISOString().slice(0,10));
+  const hCount = HABIT_KEYS.filter(k => h[k]).length;
+  document.getElementById('st-habits').textContent = hCount;
+  document.getElementById('mf-habits').style.width = (hCount / HABIT_KEYS.length * 100) + '%';
 
-  document.getElementById('stat-courses').textContent    = sum.cDone;
-  document.getElementById('stat-courses-sub').textContent = 'of ' + sum.cTotal + ' total';
-  document.getElementById('mf-courses').style.width = (sum.cDone/sum.cTotal*100) + '%';
+  // Notifications button
+  const nb2 = document.getElementById('notif-btn');
+  if (nb2) {
+    if (!sum.notifSupported) { nb2.style.display = 'none'; }
+    else if (sum.notifEnabled) { nb2.textContent = '🔔 Notifications On'; nb2.classList.add('btn-primary'); nb2.classList.remove('btn-ghost'); }
+  }
 
-  document.getElementById('stat-month').textContent = sum.planMonth;
-  document.getElementById('mf-month').style.width   = (sum.planMonth/18*100) + '%';
-
-  document.getElementById('stat-miles').textContent     = sum.mDone;
-  document.getElementById('stat-miles-sub').textContent = 'of ' + sum.mTotal + ' milestones';
-  document.getElementById('mf-miles').style.width = (sum.mDone/sum.mTotal*100) + '%';
-
-  document.getElementById('stat-tier').textContent    = t.id + ' — ' + t.name;
-  document.getElementById('stat-tier-sub').textContent= t.range;
-  document.getElementById('mf-tier').style.width       = t.fillPct + '%';
-  document.getElementById('stat-tier').style.color     = t.col;
-  document.getElementById('tl-month-tag').textContent  = 'Month ' + sum.planMonth + ' of 18';
-
-  // IELTS panel
+  // IELTS
   const taken = U.Phase.ieltsTaken();
   const score = U.Phase.ieltsScore();
-  document.getElementById('ielts-tag').textContent = taken ? (score >= 7 ? '✅ PASSED' : '⚠️ RETAKE') : 'IN PREP';
+  document.getElementById('ielts-tag').textContent = taken ? (score >= 7 ? '✅ Passed' : '⚠️ Retake') : 'In Prep';
   document.getElementById('ielts-tag').className   = 'sec-tag ' + (taken ? (score >= 7 ? 'green' : 'red') : 'amber');
-  document.getElementById('ielts-status-val').textContent = taken ? (score || '—') : 'Not taken';
-  document.getElementById('ielts-status-sub').textContent = taken
-    ? ('Taken ' + (U.Phase.ieltsTakenDate() ? new Date(U.Phase.ieltsTakenDate()).toLocaleDateString('en-GB') : ''))
-    : 'Exam date not yet set';
-  document.getElementById('ielts-status-val').style.color = taken ? (score >= 7 ? 'var(--green)' : 'var(--red)') : 'var(--amber)';
+  document.getElementById('ielts-val').textContent  = taken ? 'Band ' + score : 'Not taken';
+  document.getElementById('ielts-val').style.color  = taken ? (score >= 7 ? 'var(--green)' : 'var(--red)') : 'var(--amber)';
+  document.getElementById('ielts-sub').textContent  = taken
+    ? 'Taken ' + (U.Phase.ieltsTakenDate() ? new Date(U.Phase.ieltsTakenDate()).toLocaleDateString('en-GB') : '')
+    : 'Book July 2026 slot today';
 }
 
-function showIeltsModal() { document.getElementById('ielts-modal').style.display = 'flex'; }
+function showIeltsModal() {
+  document.getElementById('ielts-modal').style.display = 'flex';
+}
+['b-l','b-r','b-w','b-s'].forEach(id =>
+  document.getElementById(id).addEventListener('input', () => {
+    const vals = ['b-l','b-r','b-w','b-s'].map(i => parseFloat(document.getElementById(i).value)).filter(v => !isNaN(v));
+    if (!vals.length) { document.getElementById('modal-overall').textContent = '—'; return; }
+    const avg = vals.reduce((a,b) => a+b,0) / vals.length;
+    const r   = Math.round(avg * 2) / 2;
+    const el  = document.getElementById('modal-overall');
+    el.textContent  = r.toFixed(1);
+    el.style.color  = r >= 7 ? 'var(--green)' : r >= 6 ? 'var(--amber)' : 'var(--red)';
+  })
+);
 function submitIelts() {
-  const score = parseFloat(document.getElementById('ielts-score-input').value);
-  if (isNaN(score) || score < 1 || score > 9) { alert('Enter a valid band score (1–9)'); return; }
+  const score = parseFloat(document.getElementById('modal-overall').textContent);
+  if (isNaN(score)) { alert('Enter at least one band score.'); return; }
   U.markIeltsTaken(score);
   document.getElementById('ielts-modal').style.display = 'none';
   refresh();

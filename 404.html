@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sprint OS · 404</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.error-wrap{min-height:80vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 20px}
+.error-code{font-family:var(--font-display);font-size:clamp(6rem,20vw,10rem);letter-spacing:.04em;color:var(--border3);line-height:1}
+.error-title{font-family:var(--font-display);font-size:1.8rem;letter-spacing:.06em;color:var(--text);margin-top:8px}
+.error-sub{font-size:12px;color:var(--text3);margin-top:10px;max-width:380px;line-height:1.7}
+.error-links{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:28px}
+.blink-cursor{animation:blink 1s step-end infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+</style>
+</head>
+<body>
+<div id="nav-ph"></div>
+<div class="error-wrap fade-in">
+  <div class="error-code">404<span class="blink-cursor" style="color:var(--green)">_</span></div>
+  <div class="error-title">Page Not Found</div>
+  <div class="error-sub">
+    This page doesn't exist or you're offline. Sprint OS works offline for all core pages — try navigating from the dashboard.
+  </div>
+  <div class="error-links">
+    <a href="index.html"      class="btn btn-primary">→ Dashboard</a>
+    <a href="daily.html"      class="btn btn-ghost">Daily Schedule</a>
+    <a href="courses.html"    class="btn btn-ghost">Courses</a>
+    <a href="milestones.html" class="btn btn-ghost">Milestones</a>
+    <a href="savings.html"    class="btn btn-ghost">Savings</a>
+  </div>
+  <div style="margin-top:32px;font-size:10px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase">
+    Sprint OS · Anway's 18-Month OU MPhys Plan
+  </div>
+</div>
+<div id="footer-ph"></div>
+<script src="data.js"></script>
+<script src="update.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('nav-ph').innerHTML    = buildNavHTML('404.html');
+  document.getElementById('footer-ph').innerHTML = buildFooterHTML();
+});
+</script>
+</body>
+</html>

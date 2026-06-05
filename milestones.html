@@ -1,58 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Sprint OS · Milestones</title>
 <link rel="stylesheet" href="style.css">
 <style>
-.progress-header {
-  display:grid; grid-template-columns:auto 1fr; gap:24px; align-items:center;
-  background:var(--bg2); border:1px solid var(--border2);
-  border-left:3px solid var(--green); border-radius:var(--radius);
-  padding:22px 28px; margin-bottom:24px;
-}
-.ph-rings { display:flex; gap:20px; flex-wrap:wrap; }
-.ring-group { text-align:center; }
-.ring-group-label { font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--text3); margin-top:6px; }
-
-.cat-bars { flex:1; display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-.cat-bar-item {}
-.cbi-label { font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:var(--text3); margin-bottom:4px; display:flex; justify-content:space-between; }
-.cbi-track { height:4px; background:var(--border2); border-radius:2px; overflow:hidden; }
-.cbi-fill  { height:100%; border-radius:2px; transition:width 1s ease; }
-
-.m-group-head {
-  font-size:9px; letter-spacing:.18em; text-transform:uppercase;
-  color:var(--text3); padding:10px 0 6px;
-  border-top:1px solid var(--border2); margin-top:8px;
-  display:flex; justify-content:space-between; align-items:center;
-}
-.m-group-head:first-child { border-top:none; margin-top:0; }
-.mgh-count { font-size:9px; padding:1px 7px; border-radius:2px; border:1px solid var(--border2); color:var(--dim); }
-
-#ielts-section { scroll-margin-top: 80px; }
-
-.ielts-log-form {
-  background:var(--bg2); border:1px solid var(--border2);
-  border-top:2px solid var(--amber); border-radius:var(--radius);
-  padding:20px 24px; margin-bottom:20px;
-}
-.ielts-log-title { font-family:var(--font-display); font-size:1.1rem; letter-spacing:.05em; margin-bottom:14px; }
-.band-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:12px; }
-.band-input { text-align:center; }
-.band-label { font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:var(--text3); margin-bottom:4px; }
-.band-field { font-family:var(--font-display); font-size:1.3rem; text-align:center; }
-
-@media(max-width:640px){
-  .progress-header { grid-template-columns:1fr; }
-  .cat-bars { grid-template-columns:1fr; }
-  .band-grid { grid-template-columns:repeat(2,1fr); }
-}
+.progress-header{display:grid;grid-template-columns:auto 1fr;gap:22px;align-items:center;background:var(--bg2);border:1px solid var(--border2);border-left:3px solid var(--green);border-radius:var(--r);padding:20px 26px;margin-bottom:22px}
+.ph-rings{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+.ring-group{text-align:center}
+.ring-group-label{font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--text3);margin-top:5px}
+.cat-bars{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cbi-label{font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);margin-bottom:3px;display:flex;justify-content:space-between}
+.cbi-track{height:4px;background:var(--border2);border-radius:2px;overflow:hidden}
+.cbi-fill{height:100%;border-radius:2px;transition:width 1s ease}
+.m-group-head{font-size:9px;letter-spacing:.17em;text-transform:uppercase;color:var(--text3);padding:9px 0 5px;border-top:1px solid var(--border2);margin-top:6px;display:flex;justify-content:space-between;align-items:center}
+.m-group-head:first-child{border-top:none;margin-top:0}
+.mgh-count{font-size:9px;padding:1px 7px;border-radius:2px;border:1px solid var(--border2);color:var(--dim)}
+.ielts-log-form{background:var(--bg2);border:1px solid var(--border2);border-top:2px solid var(--amber);border-radius:var(--r);padding:18px 22px;margin-bottom:18px}
+.band-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
+.band-lbl{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:4px}
+.band-field{font-family:var(--font-display);font-size:1.2rem;text-align:center;width:100%}
+.ou-section{background:var(--bg2);border:1px solid var(--border2);border-top:2px solid var(--green);border-radius:var(--r);padding:18px 22px;margin-bottom:18px}
+.ou-progress{height:6px;background:var(--border2);border-radius:3px;overflow:hidden;margin-bottom:14px}
+.ou-prog-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--teal));transition:width .8s ease}
+@media(max-width:640px){.progress-header{grid-template-columns:1fr}.cat-bars{grid-template-columns:1fr}.band-grid{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
-<div id="nav-placeholder"></div>
+<div id="nav-ph"></div>
 <main class="main fade-in">
 
   <div class="page-header">
@@ -64,259 +39,217 @@
         <span class="ph-tag"><span class="ph-dot" style="background:var(--amber)"></span><span>Auto-synced to Google Drive</span></span>
       </div>
     </div>
-    <div class="ph-meta">
-      <div class="ph-month-big" id="ph-month">—</div>
-      <div class="ph-month-label">Plan Month / 18</div>
-    </div>
+    <div class="ph-meta"><div class="ph-month-big" id="ph-month">—</div><div class="ph-month-label">Plan Month / 18</div></div>
   </div>
 
   <!-- PROGRESS HEADER -->
-  <div class="progress-header" id="progress-header">
+  <div class="progress-header">
     <div class="ph-rings">
       <div class="ring-group">
         <div class="ring-wrap">
-          <svg class="ring-svg" width="72" height="72" viewBox="0 0 72 72">
-            <circle class="ring-track" cx="36" cy="36" r="28" stroke-width="6"/>
-            <circle class="ring-fill" id="ring-overall" cx="36" cy="36" r="28" stroke="var(--green)" stroke-width="6"
-              stroke-dasharray="175.9" stroke-dashoffset="175.9"/>
+          <svg class="ring-svg" width="80" height="80" viewBox="0 0 80 80">
+            <circle class="ring-track" cx="40" cy="40" r="32" stroke-width="6"/>
+            <circle class="ring-fill" id="ring-overall" cx="40" cy="40" r="32" stroke="var(--green)" stroke-width="6" stroke-dasharray="201" stroke-dashoffset="201"/>
           </svg>
-          <div class="ring-label">
-            <div class="ring-pct" id="ring-pct-overall" style="color:var(--green)">0%</div>
-            <div class="ring-sub">Overall</div>
-          </div>
+          <div class="ring-label"><div class="ring-pct" id="rpct-overall" style="color:var(--green)">0%</div><div class="ring-sub">Overall</div></div>
         </div>
-        <div class="ring-group-label" id="ring-count-overall">0 / 0</div>
+        <div class="ring-group-label" id="rcount-overall">0 / 0</div>
       </div>
       <div class="ring-group">
         <div class="ring-wrap">
-          <svg class="ring-svg" width="56" height="56" viewBox="0 0 56 56">
-            <circle class="ring-track" cx="28" cy="28" r="22" stroke-width="5"/>
-            <circle class="ring-fill" id="ring-urgent" cx="28" cy="28" r="22" stroke="var(--red)" stroke-width="5"
-              stroke-dasharray="138.2" stroke-dashoffset="138.2"/>
+          <svg class="ring-svg" width="60" height="60" viewBox="0 0 60 60">
+            <circle class="ring-track" cx="30" cy="30" r="24" stroke-width="5"/>
+            <circle class="ring-fill" id="ring-urgent" cx="30" cy="30" r="24" stroke="var(--red)" stroke-width="5" stroke-dasharray="150.8" stroke-dashoffset="150.8"/>
           </svg>
-          <div class="ring-label">
-            <div class="ring-pct" id="ring-pct-urgent" style="color:var(--red);font-size:1rem">0%</div>
-          </div>
+          <div class="ring-label"><div class="ring-pct" id="rpct-urgent" style="color:var(--red);font-size:1rem">0%</div></div>
         </div>
         <div class="ring-group-label">Urgent</div>
       </div>
       <div class="ring-group">
         <div class="ring-wrap">
-          <svg class="ring-svg" width="56" height="56" viewBox="0 0 56 56">
-            <circle class="ring-track" cx="28" cy="28" r="22" stroke-width="5"/>
-            <circle class="ring-fill" id="ring-priority" cx="28" cy="28" r="22" stroke="var(--amber)" stroke-width="5"
-              stroke-dasharray="138.2" stroke-dashoffset="138.2"/>
+          <svg class="ring-svg" width="60" height="60" viewBox="0 0 60 60">
+            <circle class="ring-track" cx="30" cy="30" r="24" stroke-width="5"/>
+            <circle class="ring-fill" id="ring-priority" cx="30" cy="30" r="24" stroke="var(--amber)" stroke-width="5" stroke-dasharray="150.8" stroke-dashoffset="150.8"/>
           </svg>
-          <div class="ring-label">
-            <div class="ring-pct" id="ring-pct-priority" style="color:var(--amber);font-size:1rem">0%</div>
-          </div>
+          <div class="ring-label"><div class="ring-pct" id="rpct-priority" style="color:var(--amber);font-size:1rem">0%</div></div>
         </div>
         <div class="ring-group-label">Priority</div>
       </div>
     </div>
-    <div class="cat-bars" id="cat-bars">
-      <div class="cat-bar-item">
-        <div class="cbi-label"><span>Critical (today/urgent)</span><span id="cb-crit">0/0</span></div>
-        <div class="cbi-track"><div class="cbi-fill" id="cbf-crit" style="background:var(--red)"></div></div>
+    <div class="cat-bars">
+      <div><div class="cbi-label"><span>Critical / Urgent</span><span id="cb-crit">0/0</span></div><div class="cbi-track"><div class="cbi-fill" id="cbf-crit" style="background:var(--red)"></div></div></div>
+      <div><div class="cbi-label"><span>Priority ★</span><span id="cb-pri">0/0</span></div><div class="cbi-track"><div class="cbi-fill" id="cbf-pri" style="background:var(--amber)"></div></div></div>
+      <div><div class="cbi-label"><span>Normal</span><span id="cb-norm">0/0</span></div><div class="cbi-track"><div class="cbi-fill" id="cbf-norm" style="background:var(--blue)"></div></div></div>
+      <div><div class="cbi-label"><span>Savings Goals</span><span id="cb-save">0/0</span></div><div class="cbi-track"><div class="cbi-fill" id="cbf-save" style="background:var(--green)"></div></div></div>
+    </div>
+  </div>
+
+  <!-- IELTS LOG -->
+  <div id="ielts-section">
+    <div class="ielts-log-form">
+      <div style="font-family:var(--font-display);font-size:1.1rem;letter-spacing:.05em;margin-bottom:12px" id="ielts-form-title">📝 Log IELTS Score</div>
+      <div class="alert warn" id="ielts-alert"><span class="alert-icon">⚡</span><span id="ielts-alert-txt">Exam not yet taken. Log your score here once you sit it — switches planner to Post-IELTS mode.</span></div>
+      <div class="band-grid">
+        <div><div class="band-lbl">Listening</div><input class="field band-field" type="number" id="b-listening" step="0.5" min="0" max="9" placeholder="—"/></div>
+        <div><div class="band-lbl">Reading</div><input class="field band-field" type="number" id="b-reading" step="0.5" min="0" max="9" placeholder="—"/></div>
+        <div><div class="band-lbl">Writing</div><input class="field band-field" type="number" id="b-writing" step="0.5" min="0" max="9" placeholder="—"/></div>
+        <div><div class="band-lbl">Speaking</div><input class="field band-field" type="number" id="b-speaking" step="0.5" min="0" max="9" placeholder="—"/></div>
       </div>
-      <div class="cat-bar-item">
-        <div class="cbi-label"><span>Priority ★</span><span id="cb-pri">0/0</span></div>
-        <div class="cbi-track"><div class="cbi-fill" id="cbf-pri" style="background:var(--amber)"></div></div>
-      </div>
-      <div class="cat-bar-item">
-        <div class="cbi-label"><span>Normal</span><span id="cb-norm">0/0</span></div>
-        <div class="cbi-track"><div class="cbi-fill" id="cbf-norm" style="background:var(--blue)"></div></div>
-      </div>
-      <div class="cat-bar-item">
-        <div class="cbi-label"><span>Savings goals</span><span id="cb-save">0/0</span></div>
-        <div class="cbi-track"><div class="cbi-fill" id="cbf-save" style="background:var(--green)"></div></div>
+      <div style="display:flex;align-items:center;gap:14px;margin-top:14px;flex-wrap:wrap">
+        <div style="font-size:9px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase">Overall Band:</div>
+        <div style="font-family:var(--font-display);font-size:2rem;color:var(--amber)" id="overall-calc">—</div>
+        <button class="btn btn-primary" onclick="submitIelts()">Save Score + Switch Mode</button>
+        <button class="btn btn-ghost" onclick="clearIelts()">Clear</button>
       </div>
     </div>
   </div>
 
-  <!-- IELTS LOG FORM -->
-  <div id="ielts-section">
-    <div class="ielts-log-form" id="ielts-log-form">
-      <div class="ielts-log-title">📝 Log IELTS Score</div>
-      <div class="alert warn" id="ielts-alert">
-        <span class="alert-icon">⚡</span>
-        <span id="ielts-alert-text">Exam not yet taken. Log your score here once you sit it — this switches the planner to Post-IELTS mode.</span>
-      </div>
-      <div class="band-grid">
-        <div class="band-input">
-          <div class="band-label">Listening</div>
-          <input class="field band-field" type="number" id="b-listening" step="0.5" min="0" max="9" placeholder="—"/>
-        </div>
-        <div class="band-input">
-          <div class="band-label">Reading</div>
-          <input class="field band-field" type="number" id="b-reading" step="0.5" min="0" max="9" placeholder="—"/>
-        </div>
-        <div class="band-input">
-          <div class="band-label">Writing</div>
-          <input class="field band-field" type="number" id="b-writing" step="0.5" min="0" max="9" placeholder="—"/>
-        </div>
-        <div class="band-input">
-          <div class="band-label">Speaking</div>
-          <input class="field band-field" type="number" id="b-speaking" step="0.5" min="0" max="9" placeholder="—"/>
-        </div>
-      </div>
-      <div style="display:flex;gap:10px;align-items:center;margin-top:16px;flex-wrap:wrap">
-        <div class="card-label">Overall Band:</div>
-        <div style="font-family:var(--font-display);font-size:1.8rem;color:var(--amber)" id="overall-calc">—</div>
-        <button class="btn btn-primary" onclick="submitIelts()">Save Score + Switch to Post-IELTS</button>
-      </div>
+  <!-- OU APPLICATION CHECKLIST -->
+  <div class="ou-section">
+    <div style="font-family:var(--font-display);font-size:1.1rem;letter-spacing:.05em;margin-bottom:10px">🎓 OU Application Checklist</div>
+    <div class="alert info" style="margin-bottom:12px">
+      <span class="alert-icon">ℹ</span>
+      Complete all items before submitting your OU MPhys application (target: Sep–Nov 2027). Click to check off.
     </div>
+    <div class="ou-progress"><div class="ou-prog-fill" id="ou-prog-fill" style="width:0%"></div></div>
+    <div id="ou-list"></div>
   </div>
 
   <!-- MILESTONE LIST -->
-  <div class="sec-head">
-    <div class="sec-title">All Milestones</div>
-    <div class="sec-line"></div>
-    <div class="sec-tag amber">18-month plan</div>
-  </div>
-
+  <div class="sec-head"><div class="sec-title">All Milestones</div><div class="sec-line"></div><div class="sec-tag amber">18-month plan · click to toggle</div></div>
   <div id="m-list-wrap"></div>
 
-  <p class="footnote">
-    ★ = top priority · ⚠️ = hard deadline · Pulsing = action needed today<br>
-    Savings milestones auto-complete when savings target is reached.<br>
-    All changes are auto-synced to Google Drive when signed in.
-  </p>
-
+  <p class="footnote">★ = top priority · ⚠️ = hard deadline · Pulsing = action needed today<br>Savings milestones auto-complete when EUR target is reached. All changes sync to Google Drive when signed in.</p>
 </main>
-<div id="footer-placeholder"></div>
-<script src="data.js"></script>
-<script src="update.js"></script>
-<script async defer src="https://apis.google.com/js/api.js" onload="U.init()"></script>
+<div id="footer-ph"></div>
+<script src="data.js"></script><script src="update.js"></script>
+<script async defer src="https://apis.google.com/js/api.js"></script>
 <script>
-window.addEventListener('load', () => { if(!window._gapiInitDone) U.init(); });
-
 document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('nav-placeholder').innerHTML    = buildNavHTML('milestones.html');
-  document.getElementById('footer-placeholder').innerHTML = buildFooterHTML();
+  document.getElementById('nav-ph').innerHTML    = buildNavHTML('milestones.html');
+  document.getElementById('footer-ph').innerHTML = buildFooterHTML();
   refreshUI();
-
-  // Live band calculation
   ['b-listening','b-reading','b-writing','b-speaking'].forEach(id =>
-    document.getElementById(id).addEventListener('input', calcOverall)
-  );
-
-  // If URL has #ielts-status, scroll to form
-  if (location.hash === '#ielts-status') {
+    document.getElementById(id).addEventListener('input', calcOverall));
+  if (location.hash === '#ielts-section')
     setTimeout(() => document.getElementById('ielts-section').scrollIntoView({behavior:'smooth'}), 300);
-  }
 });
-
-document.addEventListener('ui:refresh',         refreshUI);
-document.addEventListener('milestones:updated', refreshUI);
-document.addEventListener('savings:updated',    refreshUI);
-document.addEventListener('state:loaded',       refreshUI);
+['ui:refresh','milestones:updated','savings:updated','state:loaded','ou:updated'].forEach(e => document.addEventListener(e, refreshUI));
 
 function calcOverall() {
-  const ids = ['b-listening','b-reading','b-writing','b-speaking'];
-  const vals = ids.map(id => parseFloat(document.getElementById(id).value)).filter(v => !isNaN(v));
-  if (vals.length === 0) { document.getElementById('overall-calc').textContent = '—'; return; }
-  const avg = vals.reduce((a,b) => a+b, 0) / vals.length;
-  const rounded = Math.round(avg * 2) / 2; // IELTS rounds to nearest 0.5
+  const vals = ['b-listening','b-reading','b-writing','b-speaking']
+    .map(id => parseFloat(document.getElementById(id).value)).filter(v => !isNaN(v));
   const el = document.getElementById('overall-calc');
-  el.textContent = rounded.toFixed(1);
-  el.style.color = rounded >= 7 ? 'var(--green)' : rounded >= 6 ? 'var(--amber)' : 'var(--red)';
+  if (!vals.length) { el.textContent = '—'; el.style.color = 'var(--amber)'; return; }
+  const r = Math.round(vals.reduce((a,b) => a+b,0) / vals.length * 2) / 2;
+  el.textContent = r.toFixed(1);
+  el.style.color = r >= 7 ? 'var(--green)' : r >= 6 ? 'var(--amber)' : 'var(--red)';
 }
 
 function submitIelts() {
-  const overall = parseFloat(document.getElementById('overall-calc').textContent);
-  if (isNaN(overall)) { alert('Enter at least one band score.'); return; }
-  U.markIeltsTaken(overall);
-  refreshUI();
+  const score = parseFloat(document.getElementById('overall-calc').textContent);
+  if (isNaN(score)) { alert('Enter at least one band score.'); return; }
+  U.markIeltsTaken(score); refreshUI();
+}
+
+function clearIelts() {
+  ['b-listening','b-reading','b-writing','b-speaking'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('overall-calc').textContent = '—';
+}
+
+function setBar(key, done, total) {
+  const pct = total > 0 ? done/total*100 : 0;
+  document.getElementById('cb-'+key).textContent  = done+'/'+total;
+  document.getElementById('cbf-'+key).style.width = pct+'%';
 }
 
 function refreshUI() {
-  const mDone  = getMDone();
-  const total  = MILESTONES.length;
-  const done   = mDone.filter(Boolean).length;
-  const pct    = total > 0 ? done / total : 0;
+  const mDone = getMDone();
+  const total = MILESTONES.length;
+  const done  = mDone.filter(Boolean).length;
+
+  document.getElementById('ph-month').textContent = planMonth();
 
   // Rings
-  const circ1 = 2 * Math.PI * 28; // r=28
-  const circ2 = 2 * Math.PI * 22; // r=22
-  document.getElementById('ring-overall').style.strokeDashoffset   = circ1 * (1 - pct);
-  document.getElementById('ring-pct-overall').textContent = Math.round(pct * 100) + '%';
-  document.getElementById('ring-count-overall').textContent = done + ' / ' + total;
+  const circ1 = 2*Math.PI*32, circ2 = 2*Math.PI*24;
+  document.getElementById('ring-overall').style.strokeDashoffset  = circ1*(1-done/total);
+  document.getElementById('rpct-overall').textContent = Math.round(done/total*100)+'%';
+  document.getElementById('rcount-overall').textContent = done+' / '+total;
 
-  const urgentMs   = MILESTONES.filter(m => m.type === 'urgent' || m.type === 'today');
-  const urgentDone = urgentMs.filter((m,i) => mDone[MILESTONES.indexOf(m)]).length;
-  const uPct = urgentMs.length > 0 ? urgentDone / urgentMs.length : 0;
-  document.getElementById('ring-urgent').style.strokeDashoffset = circ2 * (1 - uPct);
-  document.getElementById('ring-pct-urgent').textContent = Math.round(uPct * 100) + '%';
+  const urgMs  = MILESTONES.filter(m => m.type==='urgent'||m.type==='today');
+  const urgDone= urgMs.filter(m => mDone[MILESTONES.indexOf(m)]).length;
+  document.getElementById('ring-urgent').style.strokeDashoffset  = circ2*(1-urgDone/Math.max(1,urgMs.length));
+  document.getElementById('rpct-urgent').textContent = Math.round(urgDone/Math.max(1,urgMs.length)*100)+'%';
 
-  const priMs   = MILESTONES.filter(m => m.pri);
-  const priDone = priMs.filter(m => mDone[MILESTONES.indexOf(m)]).length;
-  const pPct = priMs.length > 0 ? priDone / priMs.length : 0;
-  document.getElementById('ring-priority').style.strokeDashoffset = circ2 * (1 - pPct);
-  document.getElementById('ring-pct-priority').textContent = Math.round(pPct * 100) + '%';
+  const priMs  = MILESTONES.filter(m => m.pri);
+  const priDone= priMs.filter(m => mDone[MILESTONES.indexOf(m)]).length;
+  document.getElementById('ring-priority').style.strokeDashoffset = circ2*(1-priDone/Math.max(1,priMs.length));
+  document.getElementById('rpct-priority').textContent = Math.round(priDone/Math.max(1,priMs.length)*100)+'%';
 
-  // Category bars
-  const critMs   = MILESTONES.filter(m => m.type === 'urgent' || m.type === 'today');
-  const critDone = critMs.filter(m => mDone[MILESTONES.indexOf(m)]).length;
-  setBar('crit', critDone, critMs.length);
-  setBar('pri',  priDone,  priMs.length);
-  const normMs   = MILESTONES.filter(m => m.type === 'normal');
-  const normDone = normMs.filter(m => mDone[MILESTONES.indexOf(m)]).length;
-  setBar('norm', normDone, normMs.length);
-  const saveMs = MILESTONES.filter(m => m.t.toLowerCase().includes('saving'));
-  const saveDone = saveMs.filter(m => mDone[MILESTONES.indexOf(m)]).length;
-  setBar('save', saveDone, saveMs.length);
-
-  document.getElementById('ph-month').textContent = U.Phase.planMonth();
+  setBar('crit', urgDone, urgMs.length);
+  setBar('pri',  priDone, priMs.length);
+  const normMs  = MILESTONES.filter(m => m.type==='normal');
+  setBar('norm', normMs.filter(m => mDone[MILESTONES.indexOf(m)]).length, normMs.length);
+  const saveMs  = MILESTONES.filter(m => m.t.toLowerCase().includes('saving'));
+  setBar('save', saveMs.filter(m => mDone[MILESTONES.indexOf(m)]).length, saveMs.length);
 
   // IELTS form
-  const taken = U.Phase.ieltsTaken();
-  const score = U.Phase.ieltsScore();
-  const alertEl = document.getElementById('ielts-alert');
-  const alertTxt = document.getElementById('ielts-alert-text');
+  const taken = U.Phase.ieltsTaken(), score = U.Phase.ieltsScore();
+  const aEl = document.getElementById('ielts-alert');
+  const aTxt = document.getElementById('ielts-alert-txt');
   if (taken) {
-    alertEl.className = score >= 7 ? 'alert ok' : 'alert danger';
-    alertTxt.innerHTML = score >= 7
-      ? `✅ IELTS taken — Band <strong>${score}</strong>. Planner is in Post-IELTS mode. OU application now eligible.`
-      : `⚠️ IELTS taken — Band <strong>${score}</strong> (below 7.0 target). Plan a retake. Update score when ready.`;
-    document.querySelector('.ielts-log-title').textContent = 'Update IELTS Score';
+    aEl.className = score >= 7 ? 'alert ok' : 'alert danger';
+    aTxt.innerHTML = score >= 7
+      ? `✅ IELTS taken — Band <strong>${score}</strong>. Post-IELTS mode active. OU application eligible.`
+      : `⚠️ Band <strong>${score}</strong> — below 7.0. Plan a retake. Update when ready.`;
+    document.getElementById('ielts-form-title').textContent = '📝 Update IELTS Score';
+  } else {
+    aEl.className = 'alert warn';
+    aTxt.textContent = 'Exam not yet taken. Log your score here once you sit it — switches planner to Post-IELTS mode.';
   }
 
-  // Milestone list
+  // OU checklist
+  const ouDone = getOUDone();
+  const ouTotal = OU_CHECKLIST.length;
+  const ouCompleted = OU_CHECKLIST.filter(i => ouDone[i.id]).length;
+  document.getElementById('ou-prog-fill').style.width = (ouCompleted/ouTotal*100)+'%';
+  const cats = [...new Set(OU_CHECKLIST.map(i => i.cat))];
+  document.getElementById('ou-list').innerHTML = cats.map(cat => {
+    const items = OU_CHECKLIST.filter(i => i.cat === cat);
+    const catDone = items.filter(i => ouDone[i.id]).length;
+    return `<div class="ou-cat-head"><span>${cat}</span><span style="font-size:9px;color:var(--dim)">${catDone}/${items.length}</span></div>
+    ${items.map(item => `
+      <div class="ou-item ${ouDone[item.id]?'done':''} ${item.id==='submitted'?'ou-final':''}" onclick="U.toggleOUItem('${item.id}')">
+        <div class="ou-box">${ouDone[item.id]?'✓':''}</div>
+        <span class="ou-label">${item.label}</span>
+      </div>`).join('')}`;
+  }).join('');
+
+  // Milestones grouped
   const groups = [
     { label:'Critical & Urgent', types:['today','urgent'], col:'var(--red)' },
-    { label:'Priority ★', types:['priority'], col:'var(--amber)' },
-    { label:'Normal', types:['normal'], col:'var(--blue)' },
-    { label:'Done', types:['done'], col:'var(--green)' },
+    { label:'Priority ★',        types:['priority'],       col:'var(--amber)' },
+    { label:'Normal',            types:['normal'],         col:'var(--blue)' },
+    { label:'Completed / Done',  types:['done'],           col:'var(--green)' },
   ];
-
   document.getElementById('m-list-wrap').innerHTML = groups.map(g => {
     const items = MILESTONES.map((m,i) => ({m,i})).filter(({m}) => g.types.includes(m.type));
     if (!items.length) return '';
     const gDone = items.filter(({i}) => mDone[i]).length;
-    return `<div class="m-group-head">
-      <span style="color:${g.col}">${g.label}</span>
-      <span class="mgh-count">${gDone}/${items.length}</span>
-    </div>
+    return `<div class="m-group-head"><span style="color:${g.col}">${g.label}</span><span class="mgh-count">${gDone}/${items.length}</span></div>
     ${items.map(({m,i}) => {
       const isDone = mDone[i];
-      let cls = 'check-item';
-      if (isDone)              cls += ' is-done';
-      if (m.type==='urgent')   cls += ' is-urgent';
-      if (m.type==='priority') cls += ' is-priority';
-      if (m.type==='today')    cls += ' is-today';
+      const cls = ['check-item',isDone&&'is-done',m.type==='urgent'&&'is-urgent',m.type==='priority'&&'is-priority',m.type==='today'&&'is-today',m.type==='done'&&'is-done'].filter(Boolean).join(' ');
       let bCls = 'ci-badge cb-normal';
-      let bStyle = '';
-      if (m.h === 'TODAY' || m.type === 'urgent') { bCls = 'ci-badge cb-urgent'; }
-      else if (m.pri && !isDone) { bCls = 'ci-badge cb-warn'; }
-      else if (isDone) { bCls = 'ci-badge cb-done'; }
-      const noClick = m.type === 'done';
-      return `<div class="${cls}" onclick="${noClick ? '' : `toggleM(${i})`}" style="${noClick?'cursor:default':''}">
-        <div class="ci-box">${isDone ? '✓' : ''}</div>
+      if (m.h==='TODAY'||m.type==='urgent') bCls = 'ci-badge cb-urgent';
+      else if (m.pri && !isDone)            bCls = 'ci-badge cb-warn';
+      else if (isDone)                      bCls = 'ci-badge cb-done';
+      return `<div class="${cls}" onclick="${m.type!=='done'?`toggleM(${i})`:''}" style="${m.type==='done'?'cursor:default':''}">
+        <div class="ci-box">${isDone?'✓':''}</div>
         <div class="ci-content">
           <div class="ci-title">
-            ${m.type==='urgent' ? '<span style="color:var(--red);margin-right:4px">⚠️</span>' : ''}
-            ${m.pri && !isDone  ? '<span style="color:var(--amber);margin-right:4px">★</span>' : ''}
+            ${m.type==='urgent'?'<span style="color:var(--red);margin-right:4px">⚠️</span>':''}
+            ${m.pri&&!isDone?'<span style="color:var(--amber);margin-right:4px">★</span>':''}
             ${m.t}
           </div>
           <div class="ci-sub">${m.s}</div>
@@ -327,15 +260,7 @@ function refreshUI() {
   }).join('');
 }
 
-function setBar(key, done, total) {
-  const pct = total > 0 ? (done/total*100) : 0;
-  document.getElementById('cb-'+key).textContent   = done + '/' + total;
-  document.getElementById('cbf-'+key).style.width  = pct + '%';
-}
-
-function toggleM(idx) {
-  U.toggleMilestone(idx);
-}
+function toggleM(idx) { U.toggleMilestone(idx); }
 </script>
 </body>
 </html>

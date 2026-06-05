@@ -1,52 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Sprint OS · Roadmap</title>
 <link rel="stylesheet" href="style.css">
 <style>
-.timeline-overview {
-  background:var(--bg2); border:1px solid var(--border2);
-  border-radius:var(--radius); padding:20px 24px;
-  margin-bottom:28px;
-}
-.tlo-label { font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:var(--text3); margin-bottom:14px; }
-
-.period-accent { height:3px; border-radius:2px 2px 0 0; }
-
-.master-table {
-  width:100%; border-collapse:collapse; font-size:11px; margin-top:0;
-  background:var(--bg2); border:1px solid var(--border2); border-radius:var(--radius);
-  overflow:hidden;
-}
-.master-table th {
-  text-align:left; font-size:9px; letter-spacing:.14em; text-transform:uppercase;
-  color:var(--text3); padding:9px 14px; background:var(--bg3);
-  border-bottom:1px solid var(--border2);
-}
-.master-table td {
-  padding:9px 14px; border-bottom:1px solid var(--border); color:var(--text2);
-  vertical-align:top;
-}
-.master-table tr:last-child td { border-bottom:none; }
-.master-table tr:hover td { background:var(--bg3); }
-.mt-month { color:var(--amber); font-weight:600; font-size:10px; white-space:nowrap; }
-.mt-period { color:var(--text); font-weight:500; }
-.mt-focus { color:var(--text3); font-size:10px; }
-.mt-status { font-size:9px; padding:2px 7px; border-radius:2px; border:1px solid; white-space:nowrap; }
-.mts-now      { color:var(--green); border-color:rgba(0,229,160,.3); background:rgba(0,229,160,.08); }
-.mts-upcoming { color:var(--amber); border-color:rgba(255,176,32,.3); background:rgba(255,176,32,.08); }
-.mts-future   { color:var(--text3); border-color:var(--border2); }
-
-@media(max-width:640px){
-  .master-table { font-size:10px; }
-  .master-table th, .master-table td { padding:7px 10px; }
-}
+.tl-wrap{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:18px 22px;margin-bottom:24px}
+.tl-lbl{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:14px}
 </style>
 </head>
 <body>
-<div id="nav-placeholder"></div>
+<div id="nav-ph"></div>
 <main class="main fade-in">
 
   <div class="page-header">
@@ -58,135 +22,104 @@
         <span class="ph-tag"><span class="ph-dot" style="background:var(--green)"></span><span>Click goal cards to mark done</span></span>
       </div>
     </div>
-    <div class="ph-meta">
-      <div class="ph-month-big" id="ph-month">—</div>
-      <div class="ph-month-label">Current Month / 18</div>
-    </div>
+    <div class="ph-meta"><div class="ph-month-big" id="ph-month">—</div><div class="ph-month-label">Current Month / 18</div></div>
   </div>
 
   <div class="alert warn">
     <span class="alert-icon">⚡</span>
-    All timelines assume <strong>75,000–83,000 BDT/month savings</strong> and <strong>2–3 hr/day study</strong>. A slip in savings pace = a slip in OU application date.
+    All timelines assume <strong>75,000–83,000 BDT/month savings</strong> and <strong>2–3 hr/day study</strong>. A savings shortfall = delayed OU application.
   </div>
 
   <!-- TIMELINE -->
-  <div class="timeline-overview">
-    <div class="tlo-label">Sprint Timeline — 18 Months</div>
-    <div id="tl-container"></div>
+  <div class="tl-wrap">
+    <div class="tl-lbl">Sprint Timeline — 18 Months</div>
+    <div id="tl-ph"></div>
   </div>
 
-  <!-- MASTER SCHEDULE TABLE -->
-  <div class="sec-head">
-    <div class="sec-title">Month-by-Month Schedule</div>
-    <div class="sec-line"></div>
-    <div class="sec-tag dim">Auto-updates with device date</div>
-  </div>
-  <table class="master-table" id="master-table">
-    <thead>
-      <tr>
-        <th>Month</th>
-        <th>Period</th>
-        <th>Primary Focus</th>
-        <th>Key Deliverable</th>
-        <th>Status</th>
-      </tr>
-    </thead>
+  <!-- MASTER TABLE -->
+  <div class="sec-head"><div class="sec-title">Month-by-Month Schedule</div><div class="sec-line"></div><div class="sec-tag dim">Auto-updates with device date</div></div>
+  <table class="master-table">
+    <thead><tr><th>Month</th><th>Period</th><th>Primary Focus</th><th>Key Deliverable</th><th>Status</th></tr></thead>
     <tbody id="master-tbody"></tbody>
   </table>
 
   <!-- PERIOD CARDS -->
-  <div class="sec-head" style="margin-top:32px">
-    <div class="sec-title">Period Detail</div>
-    <div class="sec-line"></div>
-    <div class="sec-tag amber">Expand for goals</div>
-  </div>
-  <div id="periods-container"></div>
+  <div class="sec-head" style="margin-top:28px"><div class="sec-title">Period Detail</div><div class="sec-line"></div><div class="sec-tag amber">Expand for goals · Click goals to mark done</div></div>
+  <div id="periods-wrap"></div>
 
-  <p class="footnote">
-    Goal cards are interactive — click to mark done.<br>
-    Timeline updates automatically from your device date each time this page loads.<br>
-    All data is persisted to Google Drive when signed in, otherwise localStorage.
-  </p>
-
+  <p class="footnote">Goal cards are interactive — click to mark done. Timeline updates automatically from device date. All data synced to Google Drive when signed in.</p>
 </main>
-<div id="footer-placeholder"></div>
-<script src="data.js"></script>
-<script src="update.js"></script>
-<script async defer src="https://apis.google.com/js/api.js" onload="U.init()"></script>
+<div id="footer-ph"></div>
+<script src="data.js"></script><script src="update.js"></script>
+<script async defer src="https://apis.google.com/js/api.js"></script>
 <script>
-window.addEventListener('load', () => { if(!window._gapiInitDone) U.init(); });
-
-// Period data
 const PERIODS = [
   { p:'Months 1–2', months:[1,2], label:'May–Jul 2026 · IELTS Sprint + edX', col:'var(--red)',
-    goals:['★ Book IELTS July 2026 slot — do today','edX: Agentic AI + AI for Everyone (IBM) — done before Jun 26','LinkedIn Learning: BIM Foundations + Twinmotion (2 evenings)','IELTS prep: 1–1.5 hr/day order | 3–4 hr/day free','Saturday = full 4-band timed IELTS mock test every week','Math daily touch: Classical Mechanics (Goldstein Ch 1–3)','Push monthly savings toward 83k BDT target'] },
+    goals:['★ Book IELTS July 2026 slot — do today','edX: Agentic AI + AI for Everyone (IBM) — done before Jun 26','LinkedIn Learning: BIM Foundations + Twinmotion (2 evenings)','IELTS prep: 1–1.5 hr/day order | 3–4 hr/day free','Saturday = full 4-band timed IELTS mock every week','Math daily touch: Classical Mechanics (Goldstein Ch 1–3)','Push monthly savings toward 83k BDT target'] },
   { p:'Month 2', months:[2], label:'Jul 2026 · IELTS Exam', col:'var(--orange)',
-    goals:['★ SIT IELTS EXAM — Band 7.0','Renew Coursera license immediately after','Begin NTU BIM Application for Engineers same week','Morning slot converts to Math/Physics after exam','Courses expand to 2–3 hr/day order | 5–6 hr/day free','Raise freelance rates — IELTS certificate is proof','Target 83k BDT/month in savings'] },
+    goals:['★ SIT IELTS EXAM — Band 7.0','Renew Coursera license immediately after','Begin NTU BIM Application for Engineers same week','Morning slot converts to Math/Physics after exam','Courses expand to 2–3 hr/day (order) | 5–6 hr/day (free)','Raise freelance rates — IELTS certificate justifies it','Target 83k BDT/month in monthly savings'] },
   { p:'Months 3–7', months:[3,4,5,6,7], label:'Aug–Dec 2026 · Coursera BIM + Structural', col:'var(--amber)',
-    goals:['Coursera BIM: NTU finish + L&T Building Smarter (3)','Georgia Tech Engineering Mechanics (2) + Materials (4)','Dartmouth Engineering of Structures (4 courses)','L&T RCC System Design (3) + Steel System Design (3)','Seismology to Earthquake Engineering (resume 11%)','Math: Linear Algebra + Differential Equations daily','Savings checkpoint: 300,000–400,000 BDT by Dec 2026'] },
-  { p:'Months 8–11', months:[8,9,10,11], label:'Jan–Apr 2027 · Math + GIS + Udemy Start', col:'var(--green)',
-    goals:['L&T Piling (3) + Formwork (3) = Geotechnical done','HKUST Math for Engineers — all 5 courses (OU prerequisite)','U Michigan FEM + Johns Hopkins Math for AI','U London Research Methods (resume 8%)','L&T Sustainability (3) + Net-Zero + UC Davis GIS (3)','★ Coursera queue fully cleared by Apr 2027','Math: QM I + Group Theory daily self-study'] },
+    goals:['Coursera BIM: NTU (finish) + L&T Building Smarter (3)','Georgia Tech Engineering Mechanics (2) + Materials (4)','Dartmouth Engineering of Structures (4 courses)','L&T RCC System Design (3) + Steel System Design (3)','Seismology to Earthquake Engineering (resume 11%)','Math: Linear Algebra + Differential Equations (daily)','Savings checkpoint: 300,000–400,000 BDT by Dec 2026'] },
+  { p:'Months 8–11', months:[8,9,10,11], label:'Jan–Apr 2027 · Math + GIS + Udemy Prep', col:'var(--green)',
+    goals:['L&T Piling (3) + Formwork (3) = Geotechnical + Construction done','HKUST Math for Engineers — all 5 courses (OU prerequisite)','U Michigan FEM + Johns Hopkins Math for AI','U London Research Methods (resume 8%)','L&T Sustainability (3) + Net-Zero + UC Davis GIS (3)','★ Coursera queue fully cleared by Apr 2027','Math: QM I + Group Theory (daily self-study)'] },
   { p:'Months 12–14', months:[12,13,14], label:'May–Jul 2027 · Udemy + All Complete', col:'var(--blue)',
-    goals:['Udemy: Geotechnical ✓ Python ✓ MATLAB ✓ AI A-Z ✓ Office ✓','DROP: Cyber Security + Unreal Engine (protect timeline)','★ ALL COURSES COMPLETE','Math revision complete: GR + Differential Geometry wrap-up','Savings approaching 10,000 EUR','Thesis Paper 1 near submission or submitted','Begin assembling OU application documents'] },
+    goals:['Udemy: Geotechnical ✓ Python ✓ MATLAB ✓ AI A-Z ✓ Office ✓','DROP: Cyber Security + Unreal Engine — protect timeline','★ ALL COURSES COMPLETE','Math revision complete: GR + Differential Geometry wrap-up','Savings approaching 10,000 EUR','Thesis Paper 1 near submission or submitted','Begin assembling OU application documents'] },
   { p:'Months 15–18', months:[15,16,17,18], label:'Aug–Nov 2027 · OU Application', col:'var(--purple)',
     goals:['★ 10,000 EUR savings target HIT','Thesis Paper 1 submitted','Personal statement + transcripts + references ready','★ OU MPhys APPLICATION SUBMITTED by Nov 2027','Begin OU MPhys: Feb 2028 or Oct 2028 intake','Business: shift to 4-day week after admission confirmed','This took extraordinary discipline — well deserved'] },
 ];
 
-// Goal done state (stored by period-goal key)
-function getGoalDone() {
-  try { return JSON.parse(localStorage.getItem('goal_done')) || {}; } catch { return {}; }
-}
-function setGoalDone(obj) { localStorage.setItem('goal_done', JSON.stringify(obj)); }
-function toggleGoal(pid, gid) {
-  const obj = getGoalDone();
-  const key = pid + '_' + gid;
-  obj[key] = !obj[key];
-  setGoalDone(obj);
-  U.save();
-  renderPeriods();
-}
-
-// Month-by-month table data
 const MONTH_TABLE = [
-  { m:'1',  period:'May–Jun 2026',    focus:'IELTS Prep + edX',               key:'Book IELTS slot. Start edX courses.' },
-  { m:'2',  period:'Jul 2026',        focus:'IELTS EXAM ★',                   key:'Sit IELTS. Renew Coursera after.' },
-  { m:'3',  period:'Aug 2026',        focus:'Coursera BIM',                   key:'NTU BIM Application (resume 14%).' },
-  { m:'4',  period:'Sep 2026',        focus:'Structural — Georgia Tech',      key:'Engineering Mechanics (2) + Materials I–II.' },
-  { m:'5',  period:'Oct 2026',        focus:'Structural — Georgia Tech',      key:'Mechanics of Materials III–IV.' },
-  { m:'6',  period:'Oct–Nov 2026',    focus:'Structural — Dartmouth + L&T',   key:'Dartmouth (4) + L&T RCC (3).' },
-  { m:'7',  period:'Nov–Dec 2026',    focus:'L&T Steel + Seismic',            key:'L&T Steel (3) + Seismology.' },
-  { m:'8',  period:'Dec 2026–Jan 2027',focus:'Geotechnical + Construction',   key:'L&T Piling (3) + Formwork (3).' },
-  { m:'9',  period:'Jan–Feb 2027',    focus:'HKUST Math I',                   key:'Matrix Algebra + Differential Equations.' },
-  { m:'10', period:'Feb–Mar 2027',    focus:'HKUST Math II',                  key:'Vector Calculus + Numerical Methods + Capstone.' },
-  { m:'11', period:'Mar 2027',        focus:'FEM + Research + Sustainability', key:'U Michigan FEM + Johns Hopkins + GIS start.' },
-  { m:'12', period:'Mar–Apr 2027',    focus:'GIS + Sustainability done ★',    key:'Coursera queue cleared.' },
-  { m:'13', period:'Apr–May 2027',    focus:'Udemy — Geotechnical + Python',  key:'First 2 Udemy courses complete.' },
-  { m:'14', period:'May–Jun 2027',    focus:'Udemy — MATLAB + AI A-Z',        key:'All courses done ★ Math revision done ★' },
-  { m:'15', period:'Jun–Jul 2027',    focus:'Savings Push + OU Docs',          key:'10,000 EUR in savings. Gather transcripts.' },
-  { m:'16', period:'Aug 2027',        focus:'Thesis Submission',               key:'Thesis Paper 1 submitted.' },
-  { m:'17', period:'Sep 2027',        focus:'OU Application Prep',             key:'Personal statement + references ready.' },
-  { m:'18', period:'Oct–Nov 2027',    focus:'★ APPLY OU MPHYS',              key:'Application submitted. 18-month sprint complete.' },
+  {m:'1', period:'May–Jun 2026',     focus:'IELTS Prep + edX',               key:'Book IELTS slot. Start edX courses.'},
+  {m:'2', period:'Jul 2026',         focus:'IELTS EXAM ★',                   key:'Sit IELTS. Renew Coursera after.'},
+  {m:'3', period:'Aug 2026',         focus:'Coursera BIM',                   key:'NTU BIM Application (resume 14%).'},
+  {m:'4', period:'Sep 2026',         focus:'Structural — Georgia Tech',      key:'Engineering Mechanics (2) + Materials I–II.'},
+  {m:'5', period:'Oct 2026',         focus:'Structural — Georgia Tech',      key:'Mechanics of Materials III–IV.'},
+  {m:'6', period:'Oct–Nov 2026',     focus:'Structural — Dartmouth + L&T',   key:'Dartmouth (4) + L&T RCC (3).'},
+  {m:'7', period:'Nov–Dec 2026',     focus:'L&T Steel + Seismic',            key:'L&T Steel (3) + Seismology.'},
+  {m:'8', period:'Dec 2026–Jan 2027',focus:'Geotechnical + Construction',   key:'L&T Piling (3) + Formwork (3).'},
+  {m:'9', period:'Jan–Feb 2027',     focus:'HKUST Math I',                   key:'Matrix Algebra + Differential Equations.'},
+  {m:'10',period:'Feb–Mar 2027',     focus:'HKUST Math II',                  key:'Vector Calculus + Numerical Methods + Capstone.'},
+  {m:'11',period:'Mar 2027',         focus:'FEM + Research + Sustainability', key:'U Michigan FEM + Johns Hopkins + GIS start.'},
+  {m:'12',period:'Mar–Apr 2027',     focus:'GIS + Sustainability done ★',    key:'Coursera queue cleared.'},
+  {m:'13',period:'Apr–May 2027',     focus:'Udemy — Geotechnical + Python',  key:'First 2 Udemy courses complete.'},
+  {m:'14',period:'May–Jun 2027',     focus:'Udemy — MATLAB + AI A-Z',        key:'All courses done ★ Math revision done ★'},
+  {m:'15',period:'Jun–Jul 2027',     focus:'Savings Push + OU Docs',          key:'10,000 EUR in savings. Gather transcripts.'},
+  {m:'16',period:'Aug 2027',         focus:'Thesis Submission',               key:'Thesis Paper 1 submitted.'},
+  {m:'17',period:'Sep 2027',         focus:'OU Application Prep',             key:'Personal statement + references ready.'},
+  {m:'18',period:'Oct–Nov 2027',     focus:'★ APPLY OU MPHYS',              key:'Application submitted. Sprint complete.'},
 ];
 
+function getGoalDone() { try { return JSON.parse(localStorage.getItem('goal_done')) || {}; } catch { return {}; } }
+function setGoalDone(o) { localStorage.setItem('goal_done', JSON.stringify(o)); }
+function toggleGoal(pi, gi) {
+  const o = getGoalDone(); const k = pi+'_'+gi; o[k] = !o[k]; setGoalDone(o);
+  U.save(); renderPeriods();
+}
+
+function getPeriodOpen() { try { return JSON.parse(localStorage.getItem('rp_open')) || {0:true}; } catch { return {0:true}; } }
+function setPeriodOpen(o) { localStorage.setItem('rp_open', JSON.stringify(o)); }
+function togglePeriod(pi) {
+  const o = getPeriodOpen(); o[pi] = !o[pi]; setPeriodOpen(o); renderPeriods();
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('nav-placeholder').innerHTML    = buildNavHTML('roadmap.html');
-  document.getElementById('footer-placeholder').innerHTML = buildFooterHTML();
-  document.getElementById('tl-container').innerHTML       = buildTimelineHTML();
-  document.getElementById('ph-month').textContent = U.Phase.planMonth();
+  document.getElementById('nav-ph').innerHTML    = buildNavHTML('roadmap.html');
+  document.getElementById('footer-ph').innerHTML = buildFooterHTML();
+  document.getElementById('tl-ph').innerHTML     = buildTimelineHTML();
+  document.getElementById('ph-month').textContent = planMonth();
   renderTable();
   renderPeriods();
 });
-document.addEventListener('ui:refresh',   () => { renderTable(); renderPeriods(); });
-document.addEventListener('state:loaded', () => { renderTable(); renderPeriods(); });
+['ui:refresh','state:loaded'].forEach(e => document.addEventListener(e, () => { renderTable(); renderPeriods(); }));
 
 function renderTable() {
-  const pm = U.Phase.planMonth();
+  const pm = planMonth();
   document.getElementById('master-tbody').innerHTML = MONTH_TABLE.map(row => {
     const m = parseInt(row.m);
-    let sCls = 'mts-future', sTxt = 'Upcoming';
-    if (m === pm)  { sCls = 'mts-now';      sTxt = '▶ Now'; }
-    if (m < pm)    { sCls = 'mts-upcoming'; sTxt = '✓ Past'; }
-    if (m === 18)  { sTxt = '★ Final'; }
+    let sCls='mts-future', sTxt='Upcoming';
+    if (m < pm)  { sCls='mts-upcoming'; sTxt='✓ Past'; }
+    if (m === pm){ sCls='mts-now';      sTxt='▶ Now'; }
+    if (m === 18 && m <= pm) sTxt = '★ Final';
     return `<tr>
       <td class="mt-month">M${row.m}</td>
       <td class="mt-period">${row.period}</td>
@@ -198,30 +131,30 @@ function renderTable() {
 }
 
 function renderPeriods() {
-  const obj = getGoalDone();
-  const pm  = U.Phase.planMonth();
-  const open = JSON.parse(localStorage.getItem('rp_open') || '{"0":true}');
+  const obj  = getGoalDone();
+  const open = getPeriodOpen();
+  const pm   = planMonth();
 
-  document.getElementById('periods-container').innerHTML = PERIODS.map((period, pi) => {
-    const isCurrentPeriod = period.months.includes(pm);
-    const gDone = period.goals.filter((_, gi) => obj[pi+'_'+gi]).length;
-    const isOpen = open[pi] !== undefined ? open[pi] : isCurrentPeriod;
+  document.getElementById('periods-wrap').innerHTML = PERIODS.map((period, pi) => {
+    const isCur  = period.months.includes(pm);
+    const gDone  = period.goals.filter((_,gi) => obj[pi+'_'+gi]).length;
+    const isOpen = open[pi] !== undefined ? open[pi] : isCur;
 
-    return `<div class="period-wrap${isCurrentPeriod?' ':''}">
-      <div class="period-accent" style="background:${period.col}"></div>
-      <div class="period-head${isOpen?' open':''}" onclick="togglePeriodOpen(${pi})">
+    return `<div class="period-wrap">
+      <div style="height:2px;background:${period.col}"></div>
+      <div class="period-head${isOpen?' open':''}" onclick="togglePeriod(${pi})" style="${isCur?'border-left:3px solid '+period.col:''}">
         <div class="period-num">${period.p}</div>
         <div class="period-label">${period.label}</div>
+        ${isCur?`<span style="font-size:9px;color:var(--green);border:1px solid rgba(0,229,160,.3);padding:1px 7px;border-radius:2px;margin-right:4px">▶ NOW</span>`:''}
         <span style="font-size:9px;color:var(--text3);margin-right:8px">${gDone}/${period.goals.length}</span>
         <span class="period-chev${isOpen?' open':''}">▼</span>
       </div>
       <div class="period-body${isOpen?' open':''}">
         <div class="goal-grid">
-          ${period.goals.map((g, gi) => {
-            const isDone = !!obj[pi+'_'+gi];
-            return `<div class="goal-card${isDone?' done':''}" style="border-left-color:${period.col}" onclick="toggleGoal(${pi},${gi})">
-              <div class="goal-num">Goal ${gi+1}</div>
-              ${g}
+          ${period.goals.map((g,gi) => {
+            const done = !!obj[pi+'_'+gi];
+            return `<div class="goal-card${done?' done':''}" style="border-left-color:${period.col}" onclick="toggleGoal(${pi},${gi})">
+              <div class="goal-num">Goal ${gi+1}</div>${g}
             </div>`;
           }).join('')}
         </div>
@@ -231,13 +164,6 @@ function renderPeriods() {
       </div>
     </div>`;
   }).join('');
-}
-
-function togglePeriodOpen(pi) {
-  const open = JSON.parse(localStorage.getItem('rp_open') || '{}');
-  open[pi] = !open[pi];
-  localStorage.setItem('rp_open', JSON.stringify(open));
-  renderPeriods();
 }
 </script>
 </body>
