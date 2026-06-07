@@ -5,13 +5,13 @@
 <title>Sprint OS · Courses</title>
 <link rel="stylesheet" href="style.css">
 <style>
-.ov-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:9px;margin-bottom:20px}
-.ov-card{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:13px 15px;text-align:center;transition:transform .13s}
-.ov-card:hover{transform:translateY(-2px)}
-.ov-num{font-family:var(--font-display);font-size:1.7rem;letter-spacing:.04em;line-height:1;margin-bottom:3px}
-.ov-lbl{font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--text3)}
-.ov-bar{height:2px;border-radius:2px;margin-top:7px;overflow:hidden;background:var(--border2)}
-.ov-fill{height:100%;border-radius:2px;transition:width 1s ease}
+.ov-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:22px}
+.ov-card{background:var(--bg1);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;text-align:center;transition:transform .13s;border-left:4px solid var(--border2)}
+.ov-card:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.ov-num{font-family:var(--font-display);font-size:2rem;line-height:1;margin-bottom:4px}
+.ov-lbl{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3)}
+.ov-bar{height:6px;border-radius:3px;margin-top:9px;overflow:hidden;background:var(--border)}
+.ov-fill{height:100%;border-radius:3px;transition:width 1s ease}
 </style>
 </head>
 <body>
@@ -36,7 +36,7 @@
 
   <div class="ov-grid" id="ov-grid"></div>
   <div id="phases-wrap"></div>
-  <div style="padding:11px 0;border-top:1px solid var(--border2);margin-top:8px;font-size:11px;color:var(--text3);display:flex;gap:16px;flex-wrap:wrap" id="courses-foot"></div>
+  <div style="padding:14px 0;border-top:2px solid var(--border);margin-top:10px;font-family:var(--font-mono);font-size:13px;color:var(--text3);display:flex;gap:20px;flex-wrap:wrap" id="courses-foot"></div>
 
   <p class="footnote">★ = first priority · ✗ = DROP to protect timeline · Completed items (✓) auto-saved to Google Drive.</p>
 </main>
@@ -72,10 +72,10 @@ function renderAll() {
   const pct    = total ? Math.round(done/total*100) : 0;
 
   document.getElementById('ov-grid').innerHTML = `
-    <div class="ov-card"><div class="ov-num" style="color:var(--blue)">${done}</div><div class="ov-lbl">Completed</div><div class="ov-bar"><div class="ov-fill" style="background:var(--blue);width:${done/total*100}%"></div></div></div>
+    <div class="ov-card" style="border-left-color:var(--blue)"><div class="ov-num" style="color:var(--blue)">${done}</div><div class="ov-lbl">Completed</div><div class="ov-bar"><div class="ov-fill" style="background:var(--blue);width:${done/total*100}%"></div></div></div>
     <div class="ov-card"><div class="ov-num" style="color:var(--text3)">${total-done-dropped}</div><div class="ov-lbl">Pending</div><div class="ov-bar"><div class="ov-fill" style="background:var(--text3);width:${(total-done-dropped)/total*100}%"></div></div></div>
-    <div class="ov-card"><div class="ov-num" style="color:var(--red)">${dropped}</div><div class="ov-lbl">Drop</div><div class="ov-bar"><div class="ov-fill" style="background:var(--red);width:${dropped/total*100}%"></div></div></div>
-    <div class="ov-card"><div class="ov-num" style="color:var(--green)">${pct}%</div><div class="ov-lbl">Progress</div><div class="ov-bar"><div class="ov-fill" style="background:var(--green);width:${pct}%"></div></div></div>
+    <div class="ov-card" style="border-left-color:var(--red)"><div class="ov-num" style="color:var(--red)">${dropped}</div><div class="ov-lbl">Drop</div><div class="ov-bar"><div class="ov-fill" style="background:var(--red);width:${dropped/total*100}%"></div></div></div>
+    <div class="ov-card" style="border-left-color:var(--green)"><div class="ov-num" style="color:var(--green)">${pct}%</div><div class="ov-lbl">Progress</div><div class="ov-bar"><div class="ov-fill" style="background:var(--green);width:${pct}%"></div></div></div>
   `;
 
   const statMap = {urgent:'phs-urgent',active:'phs-active',paused:'phs-paused',later:'phs-later'};
@@ -97,7 +97,7 @@ function renderAll() {
         gHtml += `<div class="course-row ${isCDone?'is-cdone':isDone?'is-done':''}" onclick="${(c.fixed||c.drop)?'':'`toggleCourse(${gi})`'}" style="${(c.fixed||c.drop)?'cursor:default':''}">
           <div class="cr-box">${(isDone||isCDone)?'✓':''}</div>
           <div class="cr-star">${c.pri?'★':c.drop?'✗':''}</div>
-          <div class="cr-name ${c.drop?'cr-drop':''}">${c.n}${c.drop?' <em style="font-size:8px;color:var(--red)">[DROP]</em>':''}</div>
+          <div class="cr-name ${c.drop?'cr-drop':''}">${c.n}${c.drop?' <em style="font-size:11px;color:var(--red)">[DROP]</em>':''}</div>
           <div class="cr-prog">${c.prog}</div>
           <div class="cr-plat plat-${c.pc}">${c.plat}</div>
         </div>`;
@@ -119,7 +119,7 @@ function renderAll() {
         <div class="ph-prog-fill" style="width:${phPct}%;background:${colMap[p.id]}"></div>
       </div>
       <div class="phase-body${isOpen?' open':''}" id="phb-${p.id}">
-        <div class="alert ${p.alertCls}" style="margin:7px 14px 4px">
+        <div class="alert ${p.alertCls}" style="margin:9px 16px 6px">
           <span class="alert-icon">ℹ</span><span>${p.alertTxt}</span>
         </div>
         ${gHtml}

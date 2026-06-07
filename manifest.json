@@ -5,8 +5,8 @@
   "start_url": "/life-plan/index.html",
   "scope": "/life-plan/",
   "display": "standalone",
-  "background_color": "#080c10",
-  "theme_color": "#00e5a0",
+  "background_color": "#FAF8F5",
+  "theme_color": "#0D7A5F",
   "orientation": "portrait-primary",
   "icons": [
     {

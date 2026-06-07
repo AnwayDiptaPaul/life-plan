@@ -5,9 +5,11 @@
 <title>Sprint OS · Daily Schedule</title>
 <link rel="stylesheet" href="style.css">
 <style>
-.controls-bar{display:flex;gap:8px;flex-wrap:wrap;padding:12px 0;margin-bottom:16px;border-bottom:1px solid var(--border2)}
-.two-col{display:grid;grid-template-columns:1.5fr 1fr;gap:18px}
-.weekly-wrap{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:18px}
+.controls-bar{display:flex;gap:10px;flex-wrap:wrap;padding:14px 0;margin-bottom:18px;border-bottom:2px solid var(--border)}
+.two-col{display:grid;grid-template-columns:1.5fr 1fr;gap:22px}
+.weekly-wrap{background:var(--bg1);border:1px solid var(--border);border-radius:var(--r);padding:18px}
+.sched-now{background:var(--green-bg) !important;border-color:var(--green) !important}
+.now-badge{display:inline-block;font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;background:var(--green);color:#fff;padding:2px 8px;border-radius:var(--r-sm);margin-bottom:4px;font-weight:500}
 @media(max-width:900px){.two-col{grid-template-columns:1fr}}
 </style>
 </head>
@@ -44,20 +46,20 @@
     <div>
       <div class="sec-head"><div class="sec-title">Schedule</div><div class="sec-line"></div><div class="sec-tag amber" id="sched-lbl">—</div></div>
       <div class="sched-list" id="sched-list"></div>
-      <p class="footnote" style="margin-top:14px">🎯 Pre-IELTS: IELTS owns the first study block daily.<br>📐 Post-IELTS: Math/Physics takes the morning — toggle after exam.<br>▶ NOW updates every second. Sleep and meals are always protected.</p>
+      <p class="footnote" style="margin-top:16px">🎯 Pre-IELTS: IELTS owns the first study block daily.<br>📐 Post-IELTS: Math/Physics takes the morning — toggle after exam.<br>▶ NOW updates every second. Sleep and meals are always protected.</p>
     </div>
     <div>
       <div class="sec-head"><div class="sec-title">Weekly</div><div class="sec-line"></div><div class="sec-tag dim">Sprint Template</div></div>
       <div class="weekly-wrap"><div class="week-grid" id="week-grid"></div></div>
-      <div class="sec-head" style="margin-top:18px"><div class="sec-title">Key</div><div class="sec-line"></div></div>
-      <div style="display:flex;gap:5px;flex-wrap:wrap;font-size:10.5px">
-        <span class="day-blk db-work"  style="border-radius:2px;padding:2px 7px">Work</span>
-        <span class="day-blk db-study" style="border-radius:2px;padding:2px 7px">Courses</span>
-        <span class="day-blk db-math"  style="border-radius:2px;padding:2px 7px">Math</span>
-        <span class="day-blk db-self"  style="border-radius:2px;padding:2px 7px">IELTS</span>
-        <span class="day-blk db-thesis"style="border-radius:2px;padding:2px 7px">Thesis</span>
-        <span class="day-blk db-life"  style="border-radius:2px;padding:2px 7px">Culture</span>
-        <span class="day-blk db-rest"  style="border-radius:2px;padding:2px 7px">Rest</span>
+      <div class="sec-head" style="margin-top:20px"><div class="sec-title">Key</div><div class="sec-line"></div></div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap;font-size:13px">
+        <span class="day-blk db-work"  style="border-radius:var(--r-sm);padding:3px 10px">Work</span>
+        <span class="day-blk db-study" style="border-radius:var(--r-sm);padding:3px 10px">Courses</span>
+        <span class="day-blk db-math"  style="border-radius:var(--r-sm);padding:3px 10px">Math</span>
+        <span class="day-blk db-self"  style="border-radius:var(--r-sm);padding:3px 10px">IELTS</span>
+        <span class="day-blk db-thesis"style="border-radius:var(--r-sm);padding:3px 10px">Thesis</span>
+        <span class="day-blk db-life"  style="border-radius:var(--r-sm);padding:3px 10px">Culture</span>
+        <span class="day-blk db-rest"  style="border-radius:var(--r-sm);padding:3px 10px">Rest</span>
       </div>
     </div>
   </div>

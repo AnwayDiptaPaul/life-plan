@@ -6,29 +6,62 @@
 <title>Sprint OS · Dashboard</title>
 <link rel="stylesheet" href="style.css">
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#00e5a0">
+<meta name="theme-color" content="#0D7A5F">
 <style>
-.hero{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px}
-.hero-main{background:var(--bg2);border:1px solid var(--border2);border-left:3px solid var(--green);border-radius:var(--r);padding:26px 28px}
-.hero-greeting{font-family:var(--font-display);font-size:clamp(1.8rem,4vw,3rem);letter-spacing:.04em;line-height:1.1;margin-bottom:8px}
+.hero{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:28px}
+.hero-main{
+  background:var(--bg1);border:1px solid var(--border);
+  border-left:5px solid var(--green);border-radius:var(--r);
+  padding:28px 32px;
+}
+.hero-greeting{
+  font-family:var(--font-display);
+  font-size:clamp(2rem,4vw,3.2rem);line-height:1.1;margin-bottom:10px;
+}
 .hero-greeting .acc{color:var(--green)}
-.hero-priority{font-size:12px;color:var(--amber);margin-top:12px;padding:9px 13px;background:rgba(255,176,32,.06);border:1px solid rgba(255,176,32,.2);border-radius:var(--r)}
-.hero-clock{font-family:var(--font-display);font-size:3.2rem;letter-spacing:.06em;color:var(--text3);margin-top:14px;line-height:1}
-.hero-date{font-size:10px;color:var(--text3);letter-spacing:.13em;text-transform:uppercase;margin-top:3px}
-.now-card{background:var(--bg2);border:1px solid var(--border2);border-top:2px solid var(--green);border-radius:var(--r);padding:18px 20px}
-.nc-label{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:5px}
-.nc-name{font-family:var(--font-display);font-size:1.3rem;letter-spacing:.04em;color:var(--green);margin-bottom:3px;line-height:1.2}
-.nc-desc{font-size:10px;color:var(--text3);line-height:1.5}
-.nc-tag{display:inline-block;font-size:8px;letter-spacing:.1em;text-transform:uppercase;padding:2px 5px;border-radius:2px;border:1px solid rgba(0,229,160,.3);color:var(--green);margin-top:7px}
-.cd-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:22px}
-.cd-card{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:13px 15px;text-align:center}
-.cd-num{font-family:var(--font-display);font-size:2.1rem;letter-spacing:.04em;line-height:1}
-.cd-lbl{font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--text3);margin-top:4px}
-.cd-date{font-size:8.5px;color:var(--dim);margin-top:2px}
-.sync-bar{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:11px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:22px}
-.sync-bar-label{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--text3);flex-shrink:0}
-.ielts-panel{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:4px}
-.quick-links{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.hero-priority{
+  font-size:15px;color:var(--amber2);margin-top:14px;
+  padding:11px 15px;background:var(--amber-bg);
+  border:1px solid var(--amber);border-radius:var(--r-sm);line-height:1.6;
+}
+.hero-clock{
+  font-family:var(--font-mono);font-size:2.8rem;
+  letter-spacing:.04em;color:var(--text3);margin-top:16px;line-height:1;
+}
+.hero-date{
+  font-family:var(--font-mono);font-size:11px;color:var(--text3);
+  letter-spacing:.12em;text-transform:uppercase;margin-top:4px;
+}
+.now-card{
+  background:var(--bg1);border:1px solid var(--border);
+  border-top:4px solid var(--green);border-radius:var(--r);
+  padding:18px 22px;
+}
+.nc-label{
+  font-family:var(--font-mono);font-size:10px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--text3);margin-bottom:6px;
+}
+.nc-name{
+  font-family:var(--font-display);font-size:1.4rem;
+  color:var(--green);margin-bottom:4px;line-height:1.2;
+}
+.nc-desc{font-family:var(--font-mono);font-size:12px;color:var(--text3);line-height:1.5}
+.nc-tag{
+  display:inline-block;font-family:var(--font-mono);
+  font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+  padding:3px 8px;border-radius:var(--r-sm);margin-top:8px;
+  border:1px solid var(--green);color:var(--green);background:var(--green-bg);
+}
+.cd-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:28px}
+.cd-card{
+  background:var(--bg1);border:1px solid var(--border);
+  border-radius:var(--r);padding:16px 18px;text-align:center;
+}
+.cd-num{font-family:var(--font-display);font-size:2.6rem;line-height:1}
+.cd-lbl{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-top:5px}
+.cd-date{font-family:var(--font-mono);font-size:11px;color:var(--dim);margin-top:3px}
+.ielts-panel{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:6px}
+.quick-links{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px}
 @media(max-width:768px){.hero{grid-template-columns:1fr}.cd-row{grid-template-columns:1fr 1fr}}
 </style>
 </head>
@@ -44,14 +77,14 @@
       <div class="hero-clock" id="live-clock">--:--</div>
       <div class="hero-date"  id="live-date-full">—</div>
     </div>
-    <div style="display:flex;flex-direction:column;gap:10px">
+    <div style="display:flex;flex-direction:column;gap:12px">
       <div class="now-card">
         <div class="nc-label">▶ Now</div>
         <div class="nc-name" id="now-name">—</div>
         <div class="nc-desc" id="now-desc">—</div>
         <span class="nc-tag" id="now-tag">—</span>
       </div>
-      <div class="now-card" style="border-top-color:var(--text3)">
+      <div class="now-card" style="border-top-color:var(--border2)">
         <div class="nc-label">⏭ Next</div>
         <div class="nc-name" id="next-name" style="color:var(--text2)">—</div>
         <div class="nc-desc" id="next-desc">—</div>
@@ -61,17 +94,17 @@
 
   <!-- COUNTDOWNS -->
   <div class="cd-row">
-    <div class="cd-card" style="border-top:2px solid var(--red)">
+    <div class="cd-card" style="border-top:4px solid var(--red)">
       <div class="cd-num" style="color:var(--red)" id="cnt-edx">—</div>
       <div class="cd-lbl">Days · edX Expiry</div>
       <div class="cd-date">Jun 26 2026</div>
     </div>
-    <div class="cd-card" style="border-top:2px solid var(--amber)">
+    <div class="cd-card" style="border-top:4px solid var(--amber)">
       <div class="cd-num" style="color:var(--amber)" id="cnt-ielts">—</div>
       <div class="cd-lbl">Days · IELTS Target</div>
       <div class="cd-date">Jul 2026</div>
     </div>
-    <div class="cd-card" style="border-top:2px solid var(--blue)">
+    <div class="cd-card" style="border-top:4px solid var(--blue)">
       <div class="cd-num" style="color:var(--blue)" id="cnt-ou">—</div>
       <div class="cd-lbl">Days · OU Application</div>
       <div class="cd-date">Nov 2027</div>
@@ -81,42 +114,42 @@
   <!-- STATS -->
   <div class="stat-grid delay-2">
     <div class="card lift glow-g">
-      <div class="card-accent" style="background:linear-gradient(90deg,var(--green),var(--teal))"></div>
+      <div class="card-accent" style="background:linear-gradient(180deg,var(--green),var(--teal))"></div>
       <div class="card-label">Savings Progress</div>
       <div class="card-value green" id="st-savings-pct">—%</div>
       <div class="card-sub" id="st-savings-sub">— EUR of 10,000 EUR</div>
       <div class="micro-bar"><div class="micro-fill" id="mf-savings" style="background:linear-gradient(90deg,var(--green),var(--teal))"></div></div>
     </div>
     <div class="card lift">
-      <div class="card-accent" style="background:linear-gradient(90deg,var(--blue),var(--purple))"></div>
+      <div class="card-accent" style="background:linear-gradient(180deg,var(--blue),var(--purple))"></div>
       <div class="card-label">Courses Done</div>
       <div class="card-value blue" id="st-courses">—</div>
       <div class="card-sub" id="st-courses-sub">of — total</div>
       <div class="micro-bar"><div class="micro-fill" id="mf-courses" style="background:linear-gradient(90deg,var(--blue),var(--purple))"></div></div>
     </div>
     <div class="card lift glow-a">
-      <div class="card-accent" style="background:linear-gradient(90deg,var(--amber),var(--orange))"></div>
+      <div class="card-accent" style="background:linear-gradient(180deg,var(--amber),var(--orange))"></div>
       <div class="card-label">Plan Month</div>
       <div class="card-value amber" id="st-month">—</div>
       <div class="card-sub">of 18 months</div>
       <div class="micro-bar"><div class="micro-fill" id="mf-month" style="background:linear-gradient(90deg,var(--amber),var(--orange))"></div></div>
     </div>
     <div class="card lift">
-      <div class="card-accent" style="background:linear-gradient(90deg,var(--purple),var(--blue))"></div>
+      <div class="card-accent" style="background:linear-gradient(180deg,var(--purple),var(--blue))"></div>
       <div class="card-label">Milestones Hit</div>
       <div class="card-value purple" id="st-miles">—</div>
       <div class="card-sub" id="st-miles-sub">of — milestones</div>
       <div class="micro-bar"><div class="micro-fill" id="mf-miles" style="background:linear-gradient(90deg,var(--purple),var(--blue))"></div></div>
     </div>
     <div class="card lift">
-      <div class="card-accent" style="background:linear-gradient(90deg,var(--orange),var(--amber))"></div>
+      <div class="card-accent" style="background:linear-gradient(180deg,var(--orange),var(--amber))"></div>
       <div class="card-label">Pace Tier</div>
       <div class="card-value" id="st-tier" style="color:var(--orange)">—</div>
       <div class="card-sub" id="st-tier-sub">—</div>
       <div class="micro-bar"><div class="micro-fill" id="mf-tier" style="background:linear-gradient(90deg,var(--orange),var(--amber))"></div></div>
     </div>
     <div class="card lift">
-      <div class="card-accent" style="background:linear-gradient(90deg,var(--red),var(--orange))"></div>
+      <div class="card-accent" style="background:linear-gradient(180deg,var(--red),var(--orange))"></div>
       <div class="card-label">Today's Habits</div>
       <div class="card-value red" id="st-habits">—</div>
       <div class="card-sub">of 5 checked today</div>
@@ -126,7 +159,7 @@
 
   <!-- TIMELINE -->
   <div class="sec-head"><div class="sec-title">18-Month Timeline</div><div class="sec-line"></div><div class="sec-tag dim" id="tl-tag">Month — of 18</div></div>
-  <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:16px 20px;margin-bottom:22px">
+  <div style="background:var(--bg1);border:1px solid var(--border);border-radius:var(--r);padding:18px 22px;margin-bottom:28px">
     <div id="tl-ph"></div>
   </div>
 
@@ -135,8 +168,8 @@
     <span class="sync-bar-label">Google Sync</span>
     <button class="gapi-btn" id="gapi-btn" onclick="handleGapiBtn()"><span id="gapi-txt">Sign in with Google</span></button>
     <button class="btn btn-ghost" onclick="U.scheduleToday()">📅 Schedule Today</button>
-    <button class="btn btn-ghost" onclick="U.scheduleAllMilestones()">🎯 All Milestones to Calendar</button>
-    <button class="btn btn-ghost" id="notif-btn" onclick="U.requestNotifications()">🔔 Enable Notifications</button>
+    <button class="btn btn-ghost" onclick="U.scheduleAllMilestones()">🎯 All Milestones</button>
+    <button class="btn btn-ghost" id="notif-btn" onclick="U.requestNotifications()">🔔 Notifications</button>
     <span class="sync-status" id="sync-status">Not synced</span>
   </div>
 
@@ -149,24 +182,24 @@
     <div class="card">
       <div class="card-label">Current Status</div>
       <div class="card-value" id="ielts-val" style="color:var(--amber)">Not taken</div>
-      <div class="card-sub"  id="ielts-sub">Exam date not yet booked</div>
+      <div class="card-sub" id="ielts-sub">Exam date not yet booked</div>
     </div>
     <div class="card"><div class="card-label">Target Band</div><div class="card-value amber">7.0</div><div class="card-sub">Academic · Required for OU MPhys</div></div>
-    <div class="card"><div class="card-label">Exam Target</div><div class="card-value">July 2026</div><div class="card-sub">Book slot immediately if not done</div></div>
-    <div class="card" style="cursor:pointer;border-color:rgba(255,176,32,.3)" onclick="showIeltsModal()">
+    <div class="card"><div class="card-label">Exam Target</div><div class="card-value" style="font-size:1.8rem">July 2026</div><div class="card-sub">Book slot immediately if not done</div></div>
+    <div class="card" style="cursor:pointer;border-color:var(--amber)" onclick="showIeltsModal()">
       <div class="card-label">Log Score</div>
-      <div class="card-value amber">+</div>
+      <div class="card-value amber" style="font-size:2rem">+</div>
       <div class="card-sub">Click to record exam result</div>
     </div>
   </div>
 
   <!-- QUICK ACTIONS -->
-  <div class="sec-head" style="margin-top:22px"><div class="sec-title">Quick Actions</div><div class="sec-line"></div></div>
+  <div class="sec-head" style="margin-top:28px"><div class="sec-title">Quick Actions</div><div class="sec-line"></div></div>
   <div class="quick-links">
     <a href="daily.html"      class="btn btn-primary">Today's Schedule →</a>
     <a href="courses.html"    class="btn btn-ghost">Course Queue →</a>
     <a href="milestones.html" class="btn btn-ghost">Milestones →</a>
-    <a href="savings.html"    class="btn btn-ghost">Savings Tracker →</a>
+    <a href="savings.html"    class="btn btn-ghost">Savings →</a>
     <a href="roadmap.html"    class="btn btn-ghost">Roadmap →</a>
     <a href="habits.html"     class="btn btn-ghost">Habits →</a>
     <a href="review.html"     class="btn btn-ghost">Weekly Review →</a>
@@ -175,24 +208,24 @@
 </main>
 
 <!-- IELTS MODAL -->
-<div id="ielts-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:8000;align-items:center;justify-content:center">
-  <div style="background:var(--bg2);border:1px solid var(--border2);border-top:3px solid var(--green);padding:26px 30px;border-radius:var(--r);min-width:320px;max-width:420px">
-    <div style="font-family:var(--font-display);font-size:1.4rem;letter-spacing:.05em;margin-bottom:16px">Log IELTS Score</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-      <div><div style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:4px">Listening</div><input class="field" type="number" id="b-l" step="0.5" min="0" max="9" placeholder="—"/></div>
-      <div><div style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:4px">Reading</div><input class="field" type="number" id="b-r" step="0.5" min="0" max="9" placeholder="—"/></div>
-      <div><div style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:4px">Writing</div><input class="field" type="number" id="b-w" step="0.5" min="0" max="9" placeholder="—"/></div>
-      <div><div style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:4px">Speaking</div><input class="field" type="number" id="b-s" step="0.5" min="0" max="9" placeholder="—"/></div>
+<div id="ielts-modal" style="display:none;position:fixed;inset:0;background:rgba(28,26,24,.55);z-index:8000;align-items:center;justify-content:center">
+  <div style="background:var(--bg);border:1px solid var(--border);border-top:4px solid var(--green);padding:28px 32px;border-radius:var(--r);min-width:340px;max-width:440px;box-shadow:var(--shadow-lg)">
+    <div style="font-family:var(--font-display);font-size:1.6rem;margin-bottom:18px;color:var(--text)">Log IELTS Score</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+      <div><div style="font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:5px">Listening</div><input class="field" type="number" id="b-l" step="0.5" min="0" max="9" placeholder="0–9"/></div>
+      <div><div style="font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:5px">Reading</div><input class="field" type="number" id="b-r" step="0.5" min="0" max="9" placeholder="0–9"/></div>
+      <div><div style="font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:5px">Writing</div><input class="field" type="number" id="b-w" step="0.5" min="0" max="9" placeholder="0–9"/></div>
+      <div><div style="font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:5px">Speaking</div><input class="field" type="number" id="b-s" step="0.5" min="0" max="9" placeholder="0–9"/></div>
     </div>
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
-      <div style="font-size:9px;color:var(--text3)">Overall Band:</div>
-      <div style="font-family:var(--font-display);font-size:2rem;color:var(--amber)" id="modal-overall">—</div>
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px">
+      <div style="font-family:var(--font-mono);font-size:13px;color:var(--text3)">Overall Band:</div>
+      <div style="font-family:var(--font-display);font-size:2.4rem;color:var(--amber)" id="modal-overall">—</div>
     </div>
-    <div style="display:flex;gap:8px">
+    <div style="display:flex;gap:10px">
       <button class="btn btn-primary" onclick="submitIelts()">Save Score</button>
       <button class="btn btn-ghost"   onclick="document.getElementById('ielts-modal').style.display='none'">Cancel</button>
     </div>
-    <div style="font-size:10px;color:var(--text3);margin-top:12px">Saves score, switches to Post-IELTS mode, and syncs to Google Drive.</div>
+    <div style="font-family:var(--font-mono);font-size:12px;color:var(--text3);margin-top:14px">Saves score, switches to Post-IELTS mode, and syncs to Google Drive.</div>
   </div>
 </div>
 
@@ -245,7 +278,6 @@ function refresh() {
   document.getElementById('next-name').textContent = nb ? nb.n : '—';
   document.getElementById('next-desc').textContent = nb ? nb.d : '—';
 
-  // Stats
   document.getElementById('st-savings-pct').textContent   = sum.savingsPct.toFixed(1) + '%';
   document.getElementById('st-savings-sub').textContent   = Math.round(sum.savingsEur) + ' EUR of 10,000 EUR';
   document.getElementById('mf-savings').style.width       = sum.savingsPct + '%';
@@ -262,20 +294,17 @@ function refresh() {
   document.getElementById('st-tier-sub').textContent      = t.range;
   document.getElementById('mf-tier').style.width          = t.fillPct + '%';
 
-  // Habits today
   const h = getHabits(new Date().toISOString().slice(0,10));
   const hCount = HABIT_KEYS.filter(k => h[k]).length;
   document.getElementById('st-habits').textContent = hCount;
   document.getElementById('mf-habits').style.width = (hCount / HABIT_KEYS.length * 100) + '%';
 
-  // Notifications button
   const nb2 = document.getElementById('notif-btn');
   if (nb2) {
     if (!sum.notifSupported) { nb2.style.display = 'none'; }
     else if (sum.notifEnabled) { nb2.textContent = '🔔 Notifications On'; nb2.classList.add('btn-primary'); nb2.classList.remove('btn-ghost'); }
   }
 
-  // IELTS
   const taken = U.Phase.ieltsTaken();
   const score = U.Phase.ieltsScore();
   document.getElementById('ielts-tag').textContent = taken ? (score >= 7 ? '✅ Passed' : '⚠️ Retake') : 'In Prep';
